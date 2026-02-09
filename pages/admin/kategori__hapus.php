@@ -1,4 +1,4 @@
-// Letakkan di bagian paling atas file data_kategori.php setelah include koneksi
+<?php
 if (isset($_GET['hapus'])) {
     $id_hapus = mysqli_real_escape_string($koneksi, $_GET['hapus']);
     
@@ -14,3 +14,5 @@ if (isset($_GET['hapus'])) {
         }
     }
 }
+
+?>

@@ -7,8 +7,9 @@ if (!isset($_SESSION['login'])) {
 include "../../config/koneksi.php";
 
 $id = mysqli_real_escape_string($koneksi, $_GET['id']);
+$role = $_SESSION['role'];
 
-// Join tabel untuk informasi detail
+// Ambil data detail arsip
 $query = mysqli_query($koneksi, "SELECT a.*, u.nama_unit, k.nama_kategori 
                                 FROM arsip a 
                                 LEFT JOIN unit_kerja u ON a.id_unit = u.id_unit 
@@ -16,11 +17,13 @@ $query = mysqli_query($koneksi, "SELECT a.*, u.nama_unit, k.nama_kategori
                                 WHERE a.id_arsip = '$id'");
 $data = mysqli_fetch_assoc($query);
 
-if (!$data) {
-    echo "<script>alert('Arsip tidak ditemukan!'); window.location='data_arsip.php';</script>";
+// PROTEKSI UNTUK PETUGAS (Pimpinan & Admin Bebas Akses)
+if ($role == 'petugas' && $data['id_unit'] != $_SESSION['id_unit']) {
+    echo "<script>alert('Akses Ditolak! Anda tidak berhak melihat arsip unit lain.'); window.location='data_arsip.php';</script>";
     exit;
 }
 
+if (!$data) { header("Location: data_arsip.php"); exit; }
 $page = 'data_arsip.php';
 ?>
 
@@ -48,9 +51,9 @@ $page = 'data_arsip.php';
             <div class="head-title">
                 <div class="left">
                     <h1>Pratinjau Dokumen</h1>
-                    <p style="color: var(--dark);">Kode Arsip: <strong><?= $data['kode_arsip']; ?></strong></p>
+                    <p>Kode Arsip: <strong><?= $data['kode_arsip']; ?></strong></p>
                 </div>
-                <a href="arsip_download.php?id=<?= $data['id_arsip']; ?>" class="btn-add" style="background: var(--green);">
+                <a href="arsip_download.php?id=<?= $data['id_arsip']; ?>" class="btn-add" style="background: var(--blue);">
                     <i class='bx bxs-cloud-download'></i>
                     <span class="text">Unduh Berkas</span>
                 </a>
@@ -78,7 +81,7 @@ $page = 'data_arsip.php';
                 </div>
 
                 <div class="detail-card">
-                    <h3 style="margin-bottom: 20px; color: var(--dark-grey);"><i class='bx bx-info-circle'></i> Detail Arsip</h3>
+                    <h3 style="margin-bottom: 20px;"><i class='bx bx-info-circle'></i> Detail Arsip</h3>
                     
                     <div class="info-row">
                         <label>Nama / Judul Dokumen</label>

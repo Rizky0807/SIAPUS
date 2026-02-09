@@ -140,5 +140,6 @@ $page = 'data_arsip.php';
             </div>
         </main>
     </section>
+    <script src="../../assets/js/script.js"></script>
 </body>
 </html>

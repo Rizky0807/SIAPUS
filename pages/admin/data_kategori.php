@@ -28,6 +28,39 @@ $query_kategori = mysqli_query($koneksi, "SELECT * FROM kategori ORDER BY nama_k
     <link rel="stylesheet" href="../../assets/css/style.css">
     <title>Data Kategori - SIAPSIJUNJUNG</title>
 </head>
+<style>
+
+    /* Styling Breadcrumb agar Sejajar */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    grid-gap: 10px; /* Jarak antar elemen */
+    margin-top: 10px;
+}
+
+.breadcrumb li {
+    color: var(--dark);
+    list-style: none; /* Menghilangkan titik list */
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumb li a {
+    color: var(--dark-grey);
+    pointer-events: none; /* Link tidak bisa diklik jika hanya teks navigasi */
+    font-size: 14px;
+}
+
+.breadcrumb li a.active {
+    color: var(--blue); /* Warna khusus untuk halaman aktif */
+    font-weight: 600;
+}
+
+.breadcrumb li i {
+    font-size: 18px;
+    color: var(--dark-grey);
+}
+</style>
 <body>
     <?php include '../partials/sidebar.php'; ?>
 

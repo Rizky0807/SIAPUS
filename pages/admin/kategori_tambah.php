@@ -22,14 +22,53 @@ if (isset($_POST['simpan'])) {
     <link rel="stylesheet" href="../../assets/boxicons-2.1.4/css/boxicons.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
     <title>Tambah Kategori - SIAPSIJUNJUNG</title>
-</head>
+</head>\
+
+<style>
+    /* Styling Breadcrumb agar Sejajar */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    grid-gap: 10px; /* Jarak antar elemen */
+    margin-top: 10px;
+}
+
+.breadcrumb li {
+    color: var(--dark);
+    list-style: none; /* Menghilangkan titik list */
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumb li a {
+    color: var(--dark-grey);
+    font-size: 14px;
+}
+
+.breadcrumb li a.active {
+    color: var(--blue); /* Warna khusus untuk halaman aktif */
+    font-weight: 600;
+}
+
+.breadcrumb li i {
+    font-size: 18px;
+    color: var(--dark-grey);
+}
+</style>
 <body>
     <?php include '../partials/sidebar.php'; ?>
     <section id="content">
         <?php include '../partials/navbar.php'; ?>
         <main>
-            <div class="head-title">
-                <div class="left"><h1>Tambah Kategori</h1></div>
+        <div class="head-title">
+                <div class="left">
+                    <h1>Tambah Kategori</h1>
+                    <ul class="breadcrumb">
+                        <li><a href="data_kategori.php">Data Kategori</a></li>
+                        <li><i class='bx bx-chevron-right'></i></li>
+                        <li><a class="active" href="#">Edit Kategori</a></li>
+                    </ul>
+                </div>
             </div>
             <div class="form-box">
                 <form action="" method="POST">

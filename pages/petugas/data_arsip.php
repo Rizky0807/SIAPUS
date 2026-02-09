@@ -37,12 +37,14 @@ $page = 'data_arsip.php';
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../../assets/boxicons-2.1.4/css/boxicons.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
     <title>Data Arsip - SIAPSIJUNJUNG</title>
 </head>
+
 <body>
     <?php include '../partials/sidebar.php'; ?>
     <section id="content">
@@ -53,7 +55,7 @@ $page = 'data_arsip.php';
                     <h1>Data Arsip Digital</h1>
                 </div>
                 <?php if ($role !== 'pimpinan') : ?>
-                <a href="arsip_tambah.php" class="btn-add"><i class='bx bx-cloud-upload'></i><span class="text">Upload Arsip</span></a>
+                    <a href="arsip_tambah.php" class="btn-add"><i class='bx bx-cloud-upload'></i><span class="text">Upload Arsip</span></a>
                 <?php endif; ?>
             </div>
 
@@ -71,30 +73,31 @@ $page = 'data_arsip.php';
                             </tr>
                         </thead>
                         <tbody>
-                            <?php $no = 1; while($row = mysqli_fetch_assoc($query_arsip)) : ?>
-                            <tr>
-                                <td><?= $no++; ?></td>
-                                <td><span style="font-family: monospace; font-weight: bold;"><?= $row['kode_arsip']; ?></span></td>
-                                <td><?= htmlspecialchars($row['nama_arsip']); ?></td>
-                                <td><?= $row['nama_unit'] ?? 'GLOBAL'; ?></td>
-                                <td><?= date('d/m/Y', strtotime($row['created_at'])); ?></td>
-                                <td style="text-align: center;">
-    <div class="btn-group-action" style="display: flex; gap: 15px; justify-content: center;">
-        <a href="arsip_view.php?id=<?= $row['id_arsip']; ?>" title="Lihat Preview & Download">
-            <i class='bx bx-show' style="color: #3C91E6; font-size: 22px;"></i>
-        </a>
+                            <?php $no = 1;
+                            while ($row = mysqli_fetch_assoc($query_arsip)) : ?>
+                                <tr>
+                                    <td><?= $no++; ?></td>
+                                    <td><span style="font-family: monospace; font-weight: bold;"><?= $row['kode_arsip']; ?></span></td>
+                                    <td><?= htmlspecialchars($row['nama_arsip']); ?></td>
+                                    <td><?= $row['nama_unit'] ?? 'GLOBAL'; ?></td>
+                                    <td><?= date('d/m/Y', strtotime($row['created_at'])); ?></td>
+                                    <td style="text-align: center;">
+                                        <div class="btn-group-action" style="display: flex; gap: 15px; justify-content: center;">
+                                            <a href="arsip_view.php?id=<?= $row['id_arsip']; ?>" title="Lihat Preview & Download">
+                                                <i class='bx bx-show' style="color: #3C91E6; font-size: 22px;"></i>
+                                            </a>
 
-        <?php if ($role == 'admin') : ?>
-            <a href="arsip_edit.php?id=<?= $row['id_arsip']; ?>" title="Edit">
-                <i class='bx bxs-edit' style="color: #FFCE26; font-size: 22px;"></i>
-            </a>
-            <a href="arsip_hapus.php?id=<?= $row['id_arsip']; ?>" onclick="return confirm('Yakin hapus arsip ini?')" title="Hapus">
-                <i class='bx bxs-trash' style="color: #DB504A; font-size: 22px;"></i>
-            </a>
-        <?php endif; ?>
-    </div>
-</td>
-                            </tr>
+                                            <?php if ($role == 'admin') : ?>
+                                                <a href="arsip_edit.php?id=<?= $row['id_arsip']; ?>" title="Edit">
+                                                    <i class='bx bxs-edit' style="color: #FFCE26; font-size: 22px;"></i>
+                                                </a>
+                                                <a href="arsip_hapus.php?id=<?= $row['id_arsip']; ?>" onclick="return confirm('Yakin hapus arsip ini?')" title="Hapus">
+                                                    <i class='bx bxs-trash' style="color: #DB504A; font-size: 22px;"></i>
+                                                </a>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                </tr>
                             <?php endwhile; ?>
                         </tbody>
                     </table>
@@ -102,5 +105,7 @@ $page = 'data_arsip.php';
             </div>
         </main>
     </section>
+    <script src="../../assets/js/script.js"></script>
 </body>
+
 </html>

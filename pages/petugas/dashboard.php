@@ -30,12 +30,14 @@ $page = 'dashboard.php';
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../../assets/boxicons-2.1.4/css/boxicons.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
     <title>Dashboard Petugas - SIAPSIJUNJUNG</title>
 </head>
+
 <body>
     <?php include '../partials/sidebar.php'; ?>
     <section id="content">
@@ -69,7 +71,7 @@ $page = 'dashboard.php';
                 <div class="order">
                     <div class="head">
                         <h3>Arsip Terbaru Unit Anda</h3>
-                        <a href="../admin/data_arsip.php" style="font-size: 12px; color: var(--blue);">Lihat Semua</a>
+                        <!-- <a href="../admin/data_arsip.php" style="font-size: 12px; color: var(--blue);">Lihat Semua</a> -->
                     </div>
                     <table>
                         <thead>
@@ -81,13 +83,13 @@ $page = 'dashboard.php';
                             </tr>
                         </thead>
                         <tbody>
-                            <?php while($row = mysqli_fetch_assoc($arsip_terbaru)) : ?>
-                            <tr>
-                                <td><span style="font-family: monospace; font-weight: bold;"><?= $row['kode_arsip']; ?></span></td>
-                                <td><?= htmlspecialchars($row['nama_arsip']); ?></td>
-                                <td><span class="status completed"><?= $row['nama_kategori']; ?></span></td>
-                                <td><?= date('d/m/Y', strtotime($row['created_at'])); ?></td>
-                            </tr>
+                            <?php while ($row = mysqli_fetch_assoc($arsip_terbaru)) : ?>
+                                <tr>
+                                    <td><span style="font-family: monospace; font-weight: bold;"><?= $row['kode_arsip']; ?></span></td>
+                                    <td><?= htmlspecialchars($row['nama_arsip']); ?></td>
+                                    <td><span class="status completed"><?= $row['nama_kategori']; ?></span></td>
+                                    <td><?= date('d/m/Y', strtotime($row['created_at'])); ?></td>
+                                </tr>
                             <?php endwhile; ?>
                         </tbody>
                     </table>
@@ -97,4 +99,5 @@ $page = 'dashboard.php';
     </section>
     <script src="../../assets/js/script.js"></script>
 </body>
+
 </html>

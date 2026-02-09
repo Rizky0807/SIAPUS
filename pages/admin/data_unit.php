@@ -29,6 +29,40 @@ $query_unit = mysqli_query($koneksi, "SELECT * FROM unit_kerja ORDER BY nama_uni
     <link rel="stylesheet" href="../../assets/boxicons-2.1.4/css/boxicons.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css"> <title>Data Unit Kerja - SIAPSIJUNJUNG</title>
 </head>
+
+<style>
+    /* Styling Breadcrumb agar Sejajar */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    grid-gap: 10px; /* Jarak antar elemen */
+    margin-top: 10px;
+}
+
+.breadcrumb li {
+    color: var(--dark);
+    list-style: none; /* Menghilangkan titik list */
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumb li a {
+    color: var(--dark-grey);
+    pointer-events: none;;
+    font-size: 14px;
+}
+
+.breadcrumb li a.active {
+    color: var(--blue); /* Warna khusus untuk halaman aktif */
+    font-weight: 600;
+}
+
+.breadcrumb li i {
+    font-size: 18px;
+    color: var(--dark-grey);
+}
+</style>
+</style>
 <body>
     <?php include '../partials/sidebar.php'; ?>
 

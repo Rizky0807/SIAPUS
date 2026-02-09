@@ -20,7 +20,7 @@ if (isset($_POST['simpan'])) {
     $status = 'aktif';
 
     // Jika Admin, ID Unit diset NULL (karena admin memantau semua unit)
-    $id_unit = ($role == 'admin' || $role == 'pimpinan') ? "NULL" : "'".$_POST['id_unit']."'";
+    $id_unit = ($role == 'admin' || $role == 'pimpinan') ? "NULL" : "'" . $_POST['id_unit'] . "'";
 
     // Proses Upload Foto Profil
     $foto_name = "default.jpg";
@@ -52,6 +52,7 @@ $page = 'user.php';
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,6 +60,42 @@ $page = 'user.php';
     <link rel="stylesheet" href="../../assets/css/style.css">
     <title>Tambah User - SIAPSIJUNJUNG</title>
 </head>
+
+<style>
+    /* Styling Breadcrumb agar Sejajar */
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        grid-gap: 10px;
+        /* Jarak antar elemen */
+        margin-top: 10px;
+    }
+
+    .breadcrumb li {
+        color: var(--dark);
+        list-style: none;
+        /* Menghilangkan titik list */
+        display: flex;
+        align-items: center;
+    }
+
+    .breadcrumb li a {
+        color: var(--dark-grey);
+        font-size: 14px;
+    }
+
+    .breadcrumb li a.active {
+        color: var(--blue);
+        /* Warna khusus untuk halaman aktif */
+        font-weight: 600;
+    }
+
+    .breadcrumb li i {
+        font-size: 18px;
+        color: var(--dark-grey);
+    }
+</style>
+
 <body>
     <?php include '../partials/sidebar.php'; ?>
 
@@ -109,12 +146,12 @@ $page = 'user.php';
                                 <option value="admin">Administrator Sistem</option>
                             </select>
                         </div>
-                        
+
                         <div class="form-group" id="unit_field">
                             <label>Penempatan Unit Kerja</label>
                             <select name="id_unit">
                                 <option value="" disabled selected>-- Pilih Unit Kerja --</option>
-                                <?php while($u = mysqli_fetch_assoc($units)) : ?>
+                                <?php while ($u = mysqli_fetch_assoc($units)) : ?>
                                     <option value="<?= $u['id_unit']; ?>"><?= $u['nama_unit']; ?></option>
                                 <?php endwhile; ?>
                             </select>
@@ -144,8 +181,8 @@ $page = 'user.php';
         function toggleUnitField() {
             var role = document.getElementById('role_select').value;
             var unitField = document.getElementById('unit_field');
-            
-            if (role === 'admin' ||role == 'pimpinan') {
+
+            if (role === 'admin' || role == 'pimpinan') {
                 unitField.style.display = 'none';
             } else {
                 unitField.style.display = 'block';
@@ -154,4 +191,5 @@ $page = 'user.php';
     </script>
     <script src="../../assets/js/script.js"></script>
 </body>
+
 </html>

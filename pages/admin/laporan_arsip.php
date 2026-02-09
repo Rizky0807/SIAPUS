@@ -30,7 +30,9 @@ $query_base = "SELECT a.*, u.nama_unit, k.nama_kategori
 if ($role !== 'admin' && $role !== 'pimpinan') {
     $query_base .= " AND a.id_unit = '$id_unit_user'";
 }
-if ($f_unit != '') { $query_base .= " AND a.id_unit = '$f_unit'"; }
+if ($f_unit != '') {
+    $query_base .= " AND a.id_unit = '$f_unit'";
+}
 if ($tgl_awal != '' && $tgl_akhir != '') {
     $query_base .= " AND DATE(a.created_at) BETWEEN '$tgl_awal' AND '$tgl_akhir'";
 }
@@ -45,31 +47,135 @@ $page = 'laporan.php';
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../../assets/boxicons-2.1.4/css/boxicons.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
     <title>Laporan Lengkap - SIAPSIJUNJUNG</title>
     <style>
-        .report-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
-        .stat-card { background: var(--light); padding: 20px; border-radius: 12px; border-left: 5px solid var(--blue); }
-        .stat-card h3 { font-size: 24px; margin-bottom: 5px; }
-        .stat-card p { font-size: 14px; color: var(--dark-grey); }
-        
-        .filter-card { background: var(--light); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
-        .filter-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
-        
-        @media print {
-            #sidebar, #navbar, .filter-card, .btn-print, .breadcrumb, .bx-chevron-right { display: none !important; }
-            #content { width: 100%; left: 0; padding: 0; }
-            .print-only { display: block !important; }
-            .table-data { box-shadow: none !important; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { border: 1px solid #000 !important; padding: 8px; }
+        .report-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
         }
-        .print-only { display: none; }
+
+        .stat-card {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid var(--blue);
+        }
+
+        .stat-card h3 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            font-size: 14px;
+            color: var(--dark-grey);
+        }
+
+        .filter-card {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        @media print {
+
+            #sidebar,
+            nav,
+            #navbar,header,
+            .filter-card,
+            .btn-print,
+            .breadcrumb,
+            .bx-chevron-right {
+                display: none !important;
+            }
+
+            #content {
+                width: 100%;
+                left: 0;
+                padding: 0;
+            }
+
+            .print-only {
+                display: block !important;
+            }
+
+            .table-data {
+                box-shadow: none !important;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            th,
+            td {
+                border: 1px solid #000 !important;
+                padding: 8px;
+            }
+        }
+
+        .print-only {
+            display: none;
+        }
+
+        /* Styling Breadcrumb agar Sejajar */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            grid-gap: 10px;
+            /* Jarak antar elemen */
+            margin-top: 10px;
+        }
+
+        .breadcrumb li {
+            color: var(--dark);
+            list-style: none;
+            /* Menghilangkan titik list */
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumb li a {
+            color: var(--dark-grey);
+            font-size: 14px;
+        }
+
+        .breadcrumb li a.active {
+            color: var(--blue);
+            /* Warna khusus untuk halaman aktif */
+            font-weight: 600;
+        }
+
+        .breadcrumb li i {
+            font-size: 18px;
+            color: var(--dark-grey);
+        }
+
+        .btn-cancel{
+            border-radius: 8px;
+            font-size: 14px;
+            padding: 15px 20px;
+            margin: 21px;
+        }
     </style>
 </head>
+
 <body>
     <?php include '../partials/sidebar.php'; ?>
     <section id="content">
@@ -77,7 +183,7 @@ $page = 'laporan.php';
         <main>
             <div class="head-title">
                 <div class="left">
-                    <h1>Laporan Tahunan & Bulanan</h1>
+                    <h1>Laporan Arsip</h1>
                     <ul class="breadcrumb">
                         <li><a href="#">Laporan</a></li>
                         <li><i class='bx bx-chevron-right'></i></li>
@@ -89,7 +195,7 @@ $page = 'laporan.php';
                 </button>
             </div>
 
-            <div class="print-only" style="text-align: center; border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+            <div class="print-only" style="text-align: center; padding-bottom: 10px; margin-bottom: 20px;">
                 <h2>PEMERINTAH KABUPATEN SIJUNJUNG</h2>
                 <h1>PUSKESMAS SIJUNJUNG</h1>
                 <p>Alamat: Jl. Jenderal Sudirman No. 123, Sijunjung, Sumatera Barat</p>
@@ -102,7 +208,7 @@ $page = 'laporan.php';
                             <label>Unit Kerja</label>
                             <select name="filter_unit" onchange="this.form.submit()">
                                 <option value="">-- Semua Unit --</option>
-                                <?php while($u = mysqli_fetch_assoc($units)) : ?>
+                                <?php while ($u = mysqli_fetch_assoc($units)) : ?>
                                     <option value="<?= $u['id_unit']; ?>" <?= ($f_unit == $u['id_unit']) ? 'selected' : ''; ?>><?= $u['nama_unit']; ?></option>
                                 <?php endwhile; ?>
                             </select>
@@ -115,7 +221,7 @@ $page = 'laporan.php';
                             <label>Periode Akhir</label>
                             <input type="date" name="tgl_akhir" value="<?= $tgl_akhir; ?>" onchange="this.form.submit()">
                         </div>
-                        <a href="laporan_arsip.php" class="btn-cancel" style="text-decoration:none; padding: 10px;">Reset</a>
+                        <a href="laporan_arsip.php" class="btn-cancel" style="text-decoration:none; padding: 10px 15px;">Reset</a>
                     </div>
                 </form>
             </div>
@@ -123,47 +229,52 @@ $page = 'laporan.php';
             <div class="report-stats">
                 <div class="stat-card">
                     <p>Total Arsip Ditemukan</p>
-                    <h3><?= $total_arsip; ?> <span>Berkas</span></h3>
+                    <h3 style="color: var(--dark);"><?= $total_arsip; ?> <span>Berkas</span></h3>
                 </div>
                 <?php if ($f_unit == '') : ?>
-                <div class="stat-card" style="border-left-color: var(--orange);">
-                    <p>Unit Aktif</p>
-                    <h3><?= mysqli_num_rows($rekap_data); ?> <span>Unit</span></h3>
-                </div>
+                    <div class="stat-card" style="border-left-color: var(--orange);">
+                        <p>Unit Aktif</p>
+                        <h3 style="color: var(--dark);"><?= mysqli_num_rows($rekap_data); ?> <span>Unit</span></h3>
+                    </div>
                 <?php endif; ?>
             </div>
 
             <?php if ($f_unit == '') : ?>
-            <div class="table-data" style="margin-bottom: 30px;">
-                <div class="order">
-                    <div class="head"><h3>Rekap Jumlah Arsip Per Unit</h3></div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Unit Kerja</th>
-                                <th>Jumlah Arsip</th>
-                                <th>Persentase</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php mysqli_data_seek($rekap_data, 0); while($rkp = mysqli_fetch_assoc($rekap_data)) : 
-                                $persen = ($total_arsip > 0) ? round(($rkp['total'] / $total_arsip) * 100, 1) : 0;
-                            ?>
-                            <tr>
-                                <td><?= $rkp['nama_unit']; ?></td>
-                                <td><?= $rkp['total']; ?> Dokumen</td>
-                                <td><span class="status completed" style="width: <?= $persen; ?>%"><?= $persen; ?>%</span></td>
-                            </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
+                <div class="table-data" style="margin-bottom: 30px;">
+                    <div class="order">
+                        <div class="head">
+                            <h3 style="color: var(--dark);">Rekap Jumlah Arsip Per Unit</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Unit Kerja</th>
+                                    <th>Jumlah Arsip</th>
+                                    <th>Persentase</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php mysqli_data_seek($rekap_data, 0);
+                                while ($rkp = mysqli_fetch_assoc($rekap_data)) :
+                                    $persen = ($total_arsip > 0) ? round(($rkp['total'] / $total_arsip) * 100, 1) : 0;
+                                ?>
+                                    <tr>
+                                        <td><?= $rkp['nama_unit']; ?></td>
+                                        <td><?= $rkp['total']; ?> Dokumen</td>
+                                        <td><span class="status completed" style="width: <?= $persen; ?>%"><?= $persen; ?>%</span></td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
             <?php endif; ?>
 
             <div class="table-data">
                 <div class="order">
-                    <div class="head"><h3>Detail Daftar Arsip</h3></div>
+                    <div class="head">
+                        <h3 style="color: var(--dark);">Detail Daftar Arsip</h3>
+                    </div>
                     <table>
                         <thead>
                             <tr>
@@ -175,14 +286,15 @@ $page = 'laporan.php';
                             </tr>
                         </thead>
                         <tbody>
-                            <?php $no = 1; while($row = mysqli_fetch_assoc($query_laporan)) : ?>
-                            <tr onclick="window.location='arsip_view.php?id=<?= $row['id_arsip']; ?>'" style="cursor: pointer;" title="Klik untuk detail">
-                                <td><?= $no++; ?></td>
-                                <td><strong><?= $row['kode_arsip']; ?></strong></td>
-                                <td><?= htmlspecialchars($row['nama_arsip']); ?></td>
-                                <td><?= $row['nama_unit']; ?></td>
-                                <td><?= date('d/m/Y', strtotime($row['created_at'])); ?></td>
-                            </tr>
+                            <?php $no = 1;
+                            while ($row = mysqli_fetch_assoc($query_laporan)) : ?>
+                                <tr onclick="window.location='arsip_view.php?id=<?= $row['id_arsip']; ?>'" style="cursor: pointer;" title="Klik untuk detail">
+                                    <td><?= $no++; ?></td>
+                                    <td><strong><?= $row['kode_arsip']; ?></strong></td>
+                                    <td><?= htmlspecialchars($row['nama_arsip']); ?></td>
+                                    <td><?= $row['nama_unit']; ?></td>
+                                    <td><?= date('d/m/Y', strtotime($row['created_at'])); ?></td>
+                                </tr>
                             <?php endwhile; ?>
                         </tbody>
                     </table>
@@ -204,4 +316,5 @@ $page = 'laporan.php';
 
     <script src="../../assets/js/script.js"></script>
 </body>
+
 </html>

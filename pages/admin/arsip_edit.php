@@ -26,10 +26,10 @@ if (isset($_POST['update'])) {
     $kode = mysqli_real_escape_string($koneksi, $_POST['kode_arsip']);
     $id_kat = $_POST['id_kategori'];
     $deskripsi = mysqli_real_escape_string($koneksi, $_POST['deskripsi']);
-    
+
     // Logika Unit Kerja: Admin bisa ubah, Petugas tetap
     $id_unit = ($_SESSION['role'] == 'admin') ? $_POST['id_unit'] : $data['id_unit'];
-    
+
     $file_sql = "";
     if (!empty($_FILES['file_arsip']['name'])) {
         $file_name = $_FILES['file_arsip']['name'];
@@ -43,7 +43,7 @@ if (isset($_POST['update'])) {
             if (file_exists("../../assets/uploads/arsip/" . $data['file_arsip'])) {
                 unlink("../../assets/uploads/arsip/" . $data['file_arsip']);
             }
-            
+
             // Upload file baru dengan ekstensi dinamis
             $new_name = time() . "_" . str_replace(' ', '_', $nama) . "." . $extension;
             move_uploaded_file($_FILES['file_arsip']['tmp_name'], "../../assets/uploads/arsip/" . $new_name);
@@ -70,12 +70,49 @@ $page = 'data_arsip.php';
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="../../assets/boxicons-2.1.4/css/boxicons.min.css">
     <title>Edit Arsip - SIAPSIJUNJUNG</title>
 </head>
+
+<style>
+    /* Styling Breadcrumb agar Sejajar */
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        grid-gap: 10px;
+        /* Jarak antar elemen */
+        margin-top: 10px;
+    }
+
+    .breadcrumb li {
+        color: var(--dark);
+        list-style: none;
+        /* Menghilangkan titik list */
+        display: flex;
+        align-items: center;
+    }
+
+    .breadcrumb li a {
+        color: var(--dark-grey);
+        font-size: 14px;
+    }
+
+    .breadcrumb li a.active {
+        color: var(--blue);
+        /* Warna khusus untuk halaman aktif */
+        font-weight: 600;
+    }
+
+    .breadcrumb li i {
+        font-size: 18px;
+        color: var(--dark-grey);
+    }
+</style>
+
 <body>
     <?php include '../partials/sidebar.php'; ?>
     <section id="content">
@@ -107,7 +144,7 @@ $page = 'data_arsip.php';
                         <div class="form-group">
                             <label>Kategori</label>
                             <select name="id_kategori" required>
-                                <?php while($k = mysqli_fetch_assoc($kategori)) : ?>
+                                <?php while ($k = mysqli_fetch_assoc($kategori)) : ?>
                                     <option value="<?= $k['id_kategori']; ?>" <?= ($k['id_kategori'] == $data['id_kategori']) ? 'selected' : ''; ?>>
                                         <?= $k['nama_kategori']; ?>
                                     </option>
@@ -119,7 +156,7 @@ $page = 'data_arsip.php';
                             <label>Unit Kerja</label>
                             <?php if ($_SESSION['role'] == 'admin') : ?>
                                 <select name="id_unit" required>
-                                    <?php while($u = mysqli_fetch_assoc($units)) : ?>
+                                    <?php while ($u = mysqli_fetch_assoc($units)) : ?>
                                         <option value="<?= $u['id_unit']; ?>" <?= ($u['id_unit'] == $data['id_unit']) ? 'selected' : ''; ?>>
                                             <?= $u['nama_unit']; ?>
                                         </option>
@@ -152,4 +189,5 @@ $page = 'data_arsip.php';
         </main>
     </section>
 </body>
+
 </html>
