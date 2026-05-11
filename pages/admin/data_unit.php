@@ -87,9 +87,6 @@ $query_unit = mysqli_query($koneksi, "SELECT * FROM unit_kerja ORDER BY nama_uni
 
             <div class="table-data">
                 <div class="order">
-                    <div class="head">
-                        <h3>Daftar Unit Kerja Puskesmas Sijunjung</h3>
-                    </div>
                     <table>
                         <thead>
                             <tr>

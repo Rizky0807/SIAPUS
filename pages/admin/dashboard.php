@@ -173,48 +173,48 @@ $page = 'dashboard';
 
       <div class="info-data">
 
-      <div class="table-data">
-    <div class="head" style="margin-bottom: 15px;">
-        <h3 style="font-size: 18px; color: var(--dark);">Aktivitas Global Unit</h3>
-    </div>
-    <ul class="activity-list" style="list-style: none; padding: 0;">
-        <?php while ($act = mysqli_fetch_assoc($recent_activity)): ?>
-            <li style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
+        <div class="table-data">
+          <div class="head" style="margin-bottom: 15px;">
+            <h3 style="font-size: 18px; color: var(--dark);">Aktivitas Global Unit</h3>
+          </div>
+          <ul class="activity-list" style="list-style: none; padding: 0;">
+            <?php while ($act = mysqli_fetch_assoc($recent_activity)): ?>
+              <li style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
                 <div style="width: 35px; height: 35px; background: var(--light-green); color: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <i class='bx bx-upload' style="font-size: 18px;"></i>
+                  <i class='bx bx-upload' style="font-size: 18px;"></i>
                 </div>
                 <div style="overflow: hidden; width: 100%;">
-                    <p style="font-size: 13px; margin: 0; color: var(--dark); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
-                        <strong><?= htmlspecialchars($act['nama_unit'] ?? 'Admin'); ?>:</strong> <?= htmlspecialchars($act['nama_arsip']) ?>
-                    </p>
-                    <small style="color: var(--dark-grey); font-size: 11px;">
-                        <i class='bx bx-time'></i> <?= date('l, d F Y', strtotime($act['created_at'])) ?>
-                    </small>
+                  <p style="font-size: 13px; margin: 0; color: var(--dark); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                    <strong><?= htmlspecialchars($act['nama_unit'] ?? 'Admin'); ?>:</strong> <?= htmlspecialchars($act['nama_arsip']) ?>
+                  </p>
+                  <small style="color: var(--dark-grey); font-size: 11px;">
+                    <i class='bx bx-time'></i> <?= date('l, d F Y', strtotime($act['created_at'])) ?>
+                  </small>
                 </div>
-            </li>
-        <?php endwhile; ?>
-    </ul>
-</div>
-
-<div class="quick-access">
-    <a href="data_user.php" class="access-card">
-        <i class='bx bx-user-plus' style="color: var(--green);"></i>
-        <p>Tambah User</p>
-    </a>
-    <a href="data_unit.php" class="access-card">
-        <i class='bx bx-buildings' style="color: var(--orange);"></i>
-        <p>Unit Kerja</p>
-    </a>
-    <a href="laporan_arsip.php" class="access-card">
-        <i class='bx bxs-printer' style="color: #3C91E6;"></i>
-        <p>Cetak Laporan</p>
-    </a>
-    <a href="riwayat_unduhan.php" class="access-card">
-        <i class='bx bx-history' style="color: var(--red);"></i>
-        <p>Log Unduhan</p>
-    </a>
-</div>
+              </li>
+            <?php endwhile; ?>
+          </ul>
         </div>
+
+        <div class="quick-access">
+          <a href="data_user.php" class="access-card">
+            <i class='bx bx-user-plus' style="color: var(--green);"></i>
+            <p>Tambah User</p>
+          </a>
+          <a href="data_unit.php" class="access-card">
+            <i class='bx bx-buildings' style="color: var(--orange);"></i>
+            <p>Unit Kerja</p>
+          </a>
+          <a href="laporan_arsip.php" class="access-card">
+            <i class='bx bxs-printer' style="color: #3C91E6;"></i>
+            <p>Cetak Laporan</p>
+          </a>
+          <a href="riwayat_unduhan.php" class="access-card">
+            <i class='bx bx-history' style="color: var(--red);"></i>
+            <p>Log Unduhan</p>
+          </a>
+        </div>
+      </div>
     </main>
   </section>
   <script src="../../assets/js/script.js"></script>
