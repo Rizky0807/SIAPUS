@@ -5,6 +5,9 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 include "../../config/koneksi.php";
+if (!isset($koneksi)) {
+    die("Koneksi ke database gagal. Periksa konfigurasi koneksi.");
+}
 
 if (isset($_POST['simpan'])) {
     $nama = mysqli_real_escape_string($koneksi, $_POST['nama_kategori']);

@@ -6,6 +6,9 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
 }
 
 include "../../config/koneksi.php";
+if (!isset($koneksi)) {
+    die("Database connection error.");
+}
 
 // Proses Hapus Kategori
 if (isset($_GET['hapus'])) {

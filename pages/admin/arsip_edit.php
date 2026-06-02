@@ -5,6 +5,9 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] == 'pimpinan') {
     exit;
 }
 include "../../config/koneksi.php";
+if (!isset($koneksi)) {
+    die("Database connection error.");
+}
 
 $id = mysqli_real_escape_string($koneksi, $_GET['id']);
 

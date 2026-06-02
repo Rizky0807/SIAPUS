@@ -2,6 +2,11 @@
 session_start();
 include "../../config/koneksi.php";
 
+// Ensure $koneksi is defined
+if (!isset($koneksi)) {
+    die("Database connection error.");
+}
+
 if (!isset($_SESSION['login']) || $_SESSION['role'] == 'pimpinan') {
     header("Location: data_arsip.php");
     exit;

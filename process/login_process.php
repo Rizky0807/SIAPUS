@@ -2,6 +2,11 @@
 session_start();
 require '../config/koneksi.php';
 
+// Ensure $koneksi is defined
+if (!isset($koneksi)) {
+    die("Database connection error. Please check 'koneksi.php'.");
+}
+
 $username = mysqli_real_escape_string($koneksi, $_POST['username']);
 $password = $_POST['password'];
 

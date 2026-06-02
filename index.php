@@ -24,7 +24,7 @@ if (isset($_SESSION['login'])) {
 
 <body>
   
-<div class="container" id="container">
+<div class="container active" id="container">
     
     <div class="form-container sign-up">
         <form action="process/login_process.php" method="POST">
@@ -33,7 +33,7 @@ if (isset($_SESSION['login'])) {
 
             <select name="role" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #e0e0e0; background: #f8f9fa; outline: none; font-size: 14px;">
             <option value="" disabled selected>-- Pilih Peran --</option>
-            <option value="petugas">Petugas Unit</option>
+            <option value="petugas">Petugas Unit  (Bidan/Perawat/Staf)</option>
             <option value="pimpinan">Pimpinan (Kepala Puskesmas)</option>
         </select>
 

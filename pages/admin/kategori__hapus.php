@@ -1,4 +1,8 @@
 <?php
+include '../../config/koneksi.php'; // Adjust the path to your database connection file
+if (!isset($koneksi)) {
+    die("Database connection not established. Please check 'koneksi.php'.");
+}
 if (isset($_GET['hapus'])) {
     $id_hapus = mysqli_real_escape_string($koneksi, $_GET['hapus']);
     

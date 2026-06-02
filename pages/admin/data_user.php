@@ -5,6 +5,9 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 include "../../config/koneksi.php";
+if (!isset($koneksi)) {
+    die("Database connection error. Please check your 'koneksi.php' file.");
+}
 
 // Query Join untuk mengambil Nama Unit Kerja
 $query_user = mysqli_query($koneksi, "SELECT users.*, unit_kerja.nama_unit 

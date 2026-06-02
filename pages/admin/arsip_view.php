@@ -6,6 +6,10 @@ if (!isset($_SESSION['login'])) {
 }
 include "../../config/koneksi.php";
 
+if (!isset($koneksi)) {
+    die("Koneksi ke database gagal. Silakan periksa konfigurasi koneksi.");
+}
+
 $id = mysqli_real_escape_string($koneksi, $_GET['id']);
 
 // Join tabel untuk informasi detail

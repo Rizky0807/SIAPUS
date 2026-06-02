@@ -5,6 +5,9 @@ if (!isset($_SESSION['login'])) {
     exit;
 }
 include "../../config/koneksi.php";
+if (!isset($koneksi)) {
+    die("Database connection error.");
+}
 
 $role = $_SESSION['role'];
 $id_unit_user = $_SESSION['id_unit'];

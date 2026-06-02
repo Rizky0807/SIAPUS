@@ -5,6 +5,9 @@ if (!isset($_SESSION['login']) || ($_SESSION['role'] !== 'admin' && $_SESSION['r
     exit;
 }
 include "../../config/koneksi.php";
+if (!isset($koneksi)) {
+    die("Database connection error.");
+}
 
 $role = $_SESSION['role'];
 $nama_pimpinan = $_SESSION['nama'];
@@ -53,9 +56,10 @@ $page = 'laporan_arsip.php';
     <style>
         .report-header {
             background: var(--light);
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
             margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
         }
 
         .filter-flex {
@@ -63,6 +67,29 @@ $page = 'laporan_arsip.php';
             gap: 15px;
             align-items: flex-end;
             flex-wrap: wrap;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--dark-grey);
+            text-transform: uppercase;
+        }
+
+        .form-control-custom {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            background: #fff;
+            outline: none;
+            min-width: 160px;
         }
 
         .stat-grid {
@@ -78,52 +105,7 @@ $page = 'laporan_arsip.php';
             padding: 20px;
             border-radius: 12px;
             text-align: center;
-        }
-
-
-        @media print {
-
-            #sidebar,
-            nav,
-            #navbar,
-            header,
-            .filter-card,
-            .btn-print,
-            .form-group,
-            .btn-cancel,
-            .breadcrumb,
-            .bx-chevron-right {
-                display: none !important;
-            }
-
-            #content {
-                width: 100%;
-                left: 0;
-                padding: 0;
-            }
-
-            .print-only {
-                display: block !important;
-            }
-
-            .table-data {
-                box-shadow: none !important;
-            }
-
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            th,
-            td {
-                border: 1px solid #000 !important;
-                padding: 8px;
-            }
-        }
-
-        .print-only {
-            display: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
         }
 
         /* Styling Breadcrumb agar Sejajar */
@@ -131,14 +113,12 @@ $page = 'laporan_arsip.php';
             display: flex;
             align-items: center;
             grid-gap: 10px;
-            /* Jarak antar elemen */
             margin-top: 10px;
         }
 
         .breadcrumb li {
             color: var(--dark);
             list-style: none;
-            /* Menghilangkan titik list */
             display: flex;
             align-items: center;
         }
@@ -146,11 +126,11 @@ $page = 'laporan_arsip.php';
         .breadcrumb li a {
             color: var(--dark-grey);
             font-size: 14px;
+            text-decoration: none;
         }
 
         .breadcrumb li a.active {
             color: var(--blue);
-            /* Warna khusus untuk halaman aktif */
             font-weight: 600;
         }
 
@@ -159,11 +139,87 @@ $page = 'laporan_arsip.php';
             color: var(--dark-grey);
         }
 
-        .btn-cancel {
-            border-radius: 8px;
+        /* Standardisasi Desain Tombol Aksi */
+        .btn-action-custom {
+            height: 36px;
+            padding: 0 16px;
+            border-radius: 36px;
             font-size: 14px;
-            padding: 15px 20px;
-            margin: 21px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--light) !important;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-action-custom:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .print-only {
+            display: none;
+        }
+
+        /* CSS KHUSUS PRINT PREVIEW */
+        @media print {
+            #sidebar,
+            nav,
+            #navbar,
+            header,
+            .report-header,
+            .btn-print,
+            .breadcrumb,
+            .head h3 {
+                display: none !important;
+            }
+
+            #content {
+                width: 100% !important;
+                left: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            body {
+                background: #fff !important;
+            }
+
+            .print-only {
+                display: block !important;
+            }
+
+            .table-data, .order {
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                background: #fff !important;
+            }
+
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                margin-top: 20px;
+            }
+
+            th, td {
+                border: 1px solid #000 !important;
+                padding: 8px !important;
+                font-size: 12px !important;
+                color: #000 !important;
+            }
+
+            th {
+                background-color: #f2f2f2 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
         }
     </style>
 </head>
@@ -177,27 +233,33 @@ $page = 'laporan_arsip.php';
                 <div class="left">
                     <h1>Laporan Rekapitulasi Arsip</h1>
                     <ul class="breadcrumb">
-                        <li><a href="#">Pimpinan</a></li>
+                        <li><a href="dashboard.php">Pimpinan</a></li>
                         <li><i class='bx bx-chevron-right'></i></li>
-                        <li class="active">Laporan Tahunan</li>
+                        <li><a class="active" href="#">Laporan Tahunan</a></li>
                     </ul>
                 </div>
-                <button onclick="window.print()" class="btn-download btn-print">
-                    <i class='bx bxs-printer'></i> <span class="text">Cetak Laporan</span>
+                <button onclick="window.print()" class="btn-action-custom btn-print" style="background: var(--blue);">
+                    <i class='bx bxs-printer' style="font-size: 18px;"></i> 
+                    <span class="text">Cetak Laporan</span>
                 </button>
             </div>
 
-            <div class="print-only" style="text-align: center; border-bottom: 3px double #000; padding-bottom: 10px; margin-bottom: 20px;">
-                <h2 style="text-transform: uppercase;">Pemerintah Kabupaten Sijunjung</h2>
-                <h1 style="text-transform: uppercase;">Puskesmas Sijunjung</h1>
-                <p>Jl. Jenderal Sudirman No. 123, Sijunjung | Telp: (0754) xxxxx</p>
+            <div class="print-only" style="text-align: center; border-bottom: 3px double #000; padding-bottom: 10px; margin-bottom: 30px;">
+                <h2 style="text-transform: uppercase; margin: 0; font-size: 18px;">Pemerintah Kabupaten Sijunjung</h2>
+                <h1 style="text-transform: uppercase; margin: 5px 0; font-size: 22px;">Puskesmas Sijunjung</h1>
+                <p style="margin: 0; font-size: 12px; font-style: italic;">Jl. Jenderal Sudirman No. 123, Sijunjung | Telp: (0754) xxxxx</p>
+            </div>
+
+            <div class="print-only" style="margin-bottom: 20px;">
+                <p style="font-size: 12px; margin: 5px 0 0 0;">Dicetak oleh: <?= htmlspecialchars($nama_pimpinan); ?> (<?= ucfirst($role); ?>)</p>
+                <p style="font-size: 12px; margin: 2px 0 0 0;">Tanggal: <?= date('d/m/Y H:i'); ?> WIB</p>
             </div>
 
             <div class="report-header">
                 <form action="" method="GET" id="formLaporan" class="filter-flex">
                     <div class="form-group">
-                        <label style="font-size: 12px; font-weight: 600;">Unit Kerja</label><br>
-                        <select name="filter_unit" onchange="this.form.submit()" style="padding: 8px; border-radius: 8px; border: 1px solid #ddd; width: 200px;">
+                        <label>Unit Kerja</label>
+                        <select name="filter_unit" onchange="this.form.submit()" class="form-control-custom" style="width: 200px; cursor: pointer;">
                             <option value="">-- Semua Unit --</option>
                             <?php while ($u = mysqli_fetch_assoc($units)) : ?>
                                 <option value="<?= $u['id_unit']; ?>" <?= ($f_unit == $u['id_unit']) ? 'selected' : ''; ?>><?= $u['nama_unit']; ?></option>
@@ -205,25 +267,27 @@ $page = 'laporan_arsip.php';
                         </select>
                     </div>
                     <div class="form-group">
-                        <label style="font-size: 12px; font-weight: 600;">Dari Tanggal</label><br>
-                        <input type="date" name="tgl_awal" value="<?= $tgl_awal; ?>" onchange="this.form.submit()" style="padding: 7px; border-radius: 8px; border: 1px solid #ddd;">
+                        <label>Dari Tanggal</label>
+                        <input type="date" name="tgl_awal" value="<?= $tgl_awal; ?>" onchange="this.form.submit()" class="form-control-custom" style="cursor: pointer;">
                     </div>
                     <div class="form-group">
-                        <label style="font-size: 12px; font-weight: 600;">Sampai Tanggal</label><br>
-                        <input type="date" name="tgl_akhir" value="<?= $tgl_akhir; ?>" onchange="this.form.submit()" style="padding: 7px; border-radius: 8px; border: 1px solid #ddd;">
+                        <label>Sampai Tanggal</label>
+                        <input type="date" name="tgl_akhir" value="<?= $tgl_akhir; ?>" onchange="this.form.submit()" class="form-control-custom" style="cursor: pointer;">
                     </div>
-                    <a href="laporan_arsip.php" class="btn-cancel" style="padding: 10px 15px; text-decoration: none; border-radius: 8px; font-size: 12px; background: #eee; color: #333;">Reset</a>
+                    <a href="laporan_arsip.php" class="btn-action-custom" style="background: #eee; color: #333 !important; font-weight: 600;">
+                        <i class='bx bx-refresh' style="font-size: 18px;"></i> Reset
+                    </a>
                 </form>
             </div>
 
             <div class="stat-grid">
                 <div class="stat-item">
-                    <h2 style="font-size: 30px;"><?= $total_data; ?></h2>
-                    <p style="font-size: 13px;">Total Dokumen</p>
+                    <h2 style="font-size: 30px; font-weight: 700;"><?= $total_data; ?></h2>
+                    <p style="font-size: 13px; font-weight: 500; margin-top: 5px;">Total Dokumen</p>
                 </div>
                 <div class="stat-item" style="background: var(--orange);">
-                    <h2 style="font-size: 30px;"><?= mysqli_num_rows($q_rekap); ?></h2>
-                    <p style="font-size: 13px;">Total Unit Kerja</p>
+                    <h2 style="font-size: 30px; font-weight: 700;"><?= mysqli_num_rows($q_rekap); ?></h2>
+                    <p style="font-size: 13px; font-weight: 500; margin-top: 5px;">Total Unit Kerja</p>
                 </div>
             </div>
 
@@ -244,33 +308,32 @@ $page = 'laporan_arsip.php';
                             </tr>
                         </thead>
                         <tbody>
-                            <?php $no = 1;
-                            while ($row = mysqli_fetch_assoc($query_laporan)) : ?>
+                            <?php if ($total_data > 0) : $no = 1; ?>
+                                <?php while ($row = mysqli_fetch_assoc($query_laporan)) : ?>
+                                    <tr>
+                                        <td><?= $no++; ?></td>
+                                        <td><span style="font-family: monospace; font-weight: bold;"><?= $row['kode_arsip']; ?></span></td>
+                                        <td><?= htmlspecialchars($row['nama_arsip']); ?></td>
+                                        <td><?= $row['nama_unit'] ?? 'GLOBAL'; ?></td>
+                                        <td><span class="status completed" style="background: #e1f5fe; color: #039be5; font-weight: 600;"><?= $row['nama_kategori']; ?></span></td>
+                                        <td><?= date('d/m/Y', strtotime($row['created_at'])); ?></td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            <?php else : ?>
                                 <tr>
-                                    <td><?= $no++; ?></td>
-                                    <td><strong><?= $row['kode_arsip']; ?></strong></td>
-                                    <td><?= htmlspecialchars($row['nama_arsip']); ?></td>
-                                    <td><?= $row['nama_unit']; ?></td>
-                                    <td><span class="status completed" style="background: #e1f5fe; color: #039be5;"><?= $row['nama_kategori']; ?></span></td>
-                                    <td><?= date('d/m/Y', strtotime($row['created_at'])); ?></td>
-                                </tr>
-                            <?php endwhile; ?>
-                            <?php if ($total_data == 0) : ?>
-                                <tr>
-                                    <td colspan="6" style="text-align: center; padding: 30px;">Tidak ada data pada periode ini.</td>
+                                    <td colspan="6" style="text-align: center; padding: 30px; color: var(--dark-grey);">Tidak ada data pada periode ini.</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
 
-                    <div class="print-only" style="margin-top: 50px; display: flex; justify-content: flex-end;">
-                        <div style="text-align: center; width: 250px;">
+                    <div class="print-only" style="margin-top: 60px; display: flex; justify-content: flex-end;">
+                        <div style="text-align: center; width: 250px; font-size: 13px;">
                             <p>Sijunjung, <?= date('d F Y'); ?></p>
                             <p>Mengetahui,</p>
-                            <p><strong>Kepala Puskesmas Sijunjung</strong></p>
-                            <br><br><br>
-                            <p><u>( __________________________ )</u></p>
-                            <p>NIP. ............................</p>
+                            <p style="font-weight: bold; margin-bottom: 70px;">Kepala Puskesmas Sijunjung</p>
+                            <p>__________________________</p>
+                            <p style="color: #333;">NIP. ............................</p>
                         </div>
                     </div>
                 </div>

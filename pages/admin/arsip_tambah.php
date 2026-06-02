@@ -5,6 +5,9 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] == 'pimpinan') {
     exit;
 }
 include "../../config/koneksi.php";
+if (!isset($koneksi)) {
+    die("Database connection error. Please check your configuration.");
+}
 
 // Ambil data kategori & unit untuk dropdown
 $kategori = mysqli_query($koneksi, "SELECT * FROM kategori ORDER BY nama_kategori ASC");

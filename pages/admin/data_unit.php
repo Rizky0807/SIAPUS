@@ -7,6 +7,9 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
 }
 
 include "../../config/koneksi.php";
+if (!isset($koneksi)) {
+    die("Koneksi ke database gagal. Periksa konfigurasi koneksi.");
+}
 
 // Proses Hapus Data
 if (isset($_GET['hapus'])) {

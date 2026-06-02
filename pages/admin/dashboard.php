@@ -8,6 +8,11 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
 
 include "../../config/koneksi.php";
 
+// Ensure $koneksi is defined and the connection is successful
+if (!isset($koneksi) || !$koneksi) {
+    die("Database connection failed.");
+}
+
 // 5 aktivitas terbaru - Sekarang mengambil Nama Unit juga
 $query_activity = "SELECT a.*, u.nama_unit FROM arsip a 
                    LEFT JOIN unit_kerja u ON a.id_unit = u.id_unit 

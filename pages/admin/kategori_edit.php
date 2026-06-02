@@ -8,6 +8,11 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
 
 include "../../config/koneksi.php";
 
+// Ensure $koneksi is defined
+if (!isset($koneksi)) {
+    die("Database connection error.");
+}
+
 // Ambil ID dari URL
 if (!isset($_GET['id'])) {
     header("Location: data_kategori.php");

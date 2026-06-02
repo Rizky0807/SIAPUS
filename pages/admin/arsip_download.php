@@ -2,6 +2,11 @@
 session_start();
 include "../../config/koneksi.php";
 
+// Ensure $koneksi is defined
+if (!isset($koneksi)) {
+    die("Database connection error: Undefined variable 'koneksi'.");
+}
+
 // Pastikan user sudah login
 if (!isset($_SESSION['login'])) {
     header("Location: ../../index.php");
