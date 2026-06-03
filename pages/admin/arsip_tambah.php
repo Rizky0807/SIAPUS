@@ -134,6 +134,7 @@ if (isset($_POST['simpan'])) {
                     <div class="form-group">
                         <label>Unit Kerja Terkait</label>
                         <select name="id_unit" required>
+                            <option value="">-- Pilih Unit Kerja -- </option>
                             <?php while($u = mysqli_fetch_assoc($units)) : ?>
                                 <option value="<?= $u['id_unit']; ?>"><?= $u['nama_unit']; ?></option>
                             <?php endwhile; ?>

@@ -8,6 +8,10 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'pimpinan') {
 
 include "../../config/koneksi.php";
 
+if (!isset($koneksi)) {
+    die("Database connection error. Please check the configuration in 'koneksi.php'.");
+}
+
 $role = $_SESSION['role'];
 $nama_user = $_SESSION['nama'];
 

@@ -8,6 +8,11 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
 
 include "../../config/koneksi.php";
 
+// Ensure $koneksi is defined
+if (!isset($koneksi)) {
+    die("Database connection error.");
+}
+
 // Proses Simpan Data
 if (isset($_POST['simpan'])) {
     $nama_unit = mysqli_real_escape_string($koneksi, $_POST['nama_unit']);
