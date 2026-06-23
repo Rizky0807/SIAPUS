@@ -1,6 +1,7 @@
 <?php
 session_start();
 include "../../config/koneksi.php";
+/** @var mysqli $koneksi */
 
 // Proteksi Admin
 if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {

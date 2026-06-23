@@ -103,7 +103,7 @@ $page = 'user.php';
                                 </td>
                                 <td><?= $row['username']; ?></td>
                                 <td><?= $row['nama_lengkap']; ?></td>
-                                <td><?= $row['nama_unit'] ?? '<span style="color:orange;">GLOBAL (ADMIN)</span>'; ?></td>
+                                <td><?= $row['nama_unit'] ?? '<span style="color:orange;">-</span>'; ?></td>
                                 <td><span class="status <?= $row['role']; ?>"><?= ucfirst($row['role']); ?></span></td>
                                 <td>
                                     <span style="color: <?= $row['status'] == 'aktif' ? 'green' : 'red'; ?>; font-weight: bold;">

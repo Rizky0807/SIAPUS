@@ -23,8 +23,8 @@ li {
   --light-green: #CFE8FF;
   --grey: #eee;
   --dark-grey: #AAAAAA;
-  --dark: #342E37;
-  --red: #DB504A;
+  --dark: #000000;
+  --red: #000000;
   --yellow: #FFCE26;
   --light-yellow: #FFF2C6;
   --orange: #FD7238;
@@ -56,13 +56,16 @@ body {
   overflow-x: hidden;
 }
 
-body.dark .form-box { background: var(--white-card); }
-body.dark .form-group input, 
-body.dark .form-group select, 
-body.dark .form-group textarea { 
-    background: var(--white-card); 
-    border-color: var(--border-color); 
-    color: var(--dark); 
+body.dark .form-box {
+  background: var(--white-card);
+}
+
+body.dark .form-group input,
+body.dark .form-group select,
+body.dark .form-group textarea {
+  background: var(--white-card);
+  border-color: var(--border-color);
+  color: var(--dark);
 }
 
 /* SIDEBAR */
@@ -88,16 +91,16 @@ body.dark .form-group textarea {
 #sidebar .brand {
   display: flex;
   align-items: center;
-  gap: 10px; 
+  gap: 10px;
   font-size: 20px;
   font-weight: 700;
   color: var(--green);
-  padding: 25px 15px; 
+  padding: 25px 15px;
   box-sizing: content-box;
 }
 
 #sidebar .brand img.logo {
-  width: 42px; 
+  width: 42px;
   height: auto;
   object-fit: contain;
 }
@@ -347,6 +350,7 @@ body.dark .form-group textarea {
 body.dark #content main .head-title .left .nav-link {
   color: #cbd5e0 !important;
 }
+
 /* REUSABLE TABLE SYSTEM */
 .table-data {
   width: 100%;
@@ -594,6 +598,7 @@ input[type="file"]:hover {
   gap: 12px;
   margin-top: 30px;
 }
+
 /* BOX INFO & OTHERS */
 #content main .box-info {
   display: grid;
@@ -641,7 +646,7 @@ input[type="file"]:hover {
   display: inline-flex !important;
   align-items: center;
   gap: 8px;
-  background: #6c757d !important; 
+  background: #6c757d !important;
   color: #fff !important;
   padding: 10px 18px !important;
   border-radius: 10px !important;
@@ -650,7 +655,7 @@ input[type="file"]:hover {
   margin-bottom: 20px;
   transition: 0.3s;
   text-decoration: none;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
 }
 
 .btn-back:hover {
@@ -754,11 +759,11 @@ input[type="file"]:hover {
 
 @media screen and (max-width: 1024px) {
   .preview-layout {
-      flex-direction: column;
+    flex-direction: column;
   }
+
   .preview-info {
-      flex: 1 1 auto;
-      width: 100%;
+    flex: 1 1 auto;
+    width: 100%;
   }
 }
-

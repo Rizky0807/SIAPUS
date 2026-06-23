@@ -5,6 +5,8 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 include "../../config/koneksi.php";
+/** @var mysqli $koneksi */
+
 if (!isset($koneksi)) {
     die("Koneksi ke database gagal. Periksa konfigurasi koneksi.");
 }

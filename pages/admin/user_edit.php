@@ -5,10 +5,17 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 include "../../config/koneksi.php";
+/** @var mysqli $koneksi */
 
 $id = mysqli_real_escape_string($koneksi, $_GET['id']);
 $query = mysqli_query($koneksi, "SELECT * FROM users WHERE id_user = '$id'");
 $data = mysqli_fetch_assoc($query);
+
+// Jika data user tidak ditemukan
+if (!$data) {
+    echo "<script>alert('Data user tidak ditemukan!'); window.location='data_user.php';</script>";
+    exit;
+}
 
 // Ambil data unit untuk dropdown
 $units = mysqli_query($koneksi, "SELECT * FROM unit_kerja ORDER BY nama_unit ASC");
@@ -18,7 +25,24 @@ if (isset($_POST['update'])) {
     $username = mysqli_real_escape_string($koneksi, $_POST['username']);
     $role = $_POST['role'];
     $status = $_POST['status'];
-    $id_unit = ($role == 'admin') ? 'NULL' : $_POST['id_unit'];
+    
+    // 💡 PERBAIKAN LOGIKA: Inisialisasi default nilai unit baru
+    $id_unit = "NULL";
+    $nama_unit = "NULL";
+
+    // Jika yang diedit diubah/tetap menjadi petugas
+    if ($role === 'petugas' && !empty($_POST['id_unit'])) {
+        $id_unit_input = mysqli_real_escape_string($koneksi, $_POST['id_unit']);
+        $id_unit = "'" . $id_unit_input . "'";
+
+        // Ambil nama unit terbaru dari tabel unit_kerja
+        $cari_nama_unit = mysqli_query($koneksi, "SELECT nama_unit FROM unit_kerja WHERE id_unit = '$id_unit_input'");
+        $data_unit = mysqli_fetch_assoc($cari_nama_unit);
+        
+        if ($data_unit) {
+            $nama_unit = "'" . mysqli_real_escape_string($koneksi, $data_unit['nama_unit']) . "'";
+        }
+    }
     
     // Logika Password: Jika diisi maka ganti, jika kosong tetap password lama
     if (!empty($_POST['password'])) {
@@ -31,7 +55,8 @@ if (isset($_POST['update'])) {
     // Logika Foto Profil
     $foto_name = $data['foto'];
     if (!empty($_FILES['foto']['name'])) {
-        $foto_name = time() . "_" . $_FILES['foto']['name'];
+        $extension = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+        $foto_name = time() . "_" . $username . "." . $extension;
         move_uploaded_file($_FILES['foto']['tmp_name'], "../../assets/img/profiles/" . $foto_name);
         
         // Hapus foto lama jika bukan default
@@ -40,11 +65,13 @@ if (isset($_POST['update'])) {
         }
     }
 
+    // 💡 SEKARANG UPDATE TERMASUK id_unit TANPA PETIK DAN nama_unit
     $update = mysqli_query($koneksi, "UPDATE users SET 
                 nama_lengkap = '$nama', 
                 username = '$username', 
                 role = '$role', 
                 id_unit = $id_unit, 
+                nama_unit = $nama_unit, 
                 status = '$status', 
                 foto = '$foto_name' 
                 $sql_pass 
@@ -52,10 +79,12 @@ if (isset($_POST['update'])) {
 
     if ($update) {
         echo "<script>alert('Data user berhasil diperbarui!'); window.location='data_user.php';</script>";
+    } else {
+        echo "Error: " . mysqli_error($koneksi);
     }
 }
 
-$page = 'user.php';
+$page = 'data_user.php';
 ?>
 
 <!DOCTYPE html>
@@ -68,17 +97,17 @@ $page = 'user.php';
 </head>
 
 <style>
-       /* Styling Breadcrumb agar Sejajar */
+/* Styling Breadcrumb agar Sejajar */
 .breadcrumb {
     display: flex;
     align-items: center;
-    grid-gap: 10px; /* Jarak antar elemen */
+    grid-gap: 10px;
     margin-top: 10px;
 }
 
 .breadcrumb li {
     color: var(--dark);
-    list-style: none; /* Menghilangkan titik list */
+    list-style: none;
     display: flex;
     align-items: center;
 }
@@ -86,10 +115,11 @@ $page = 'user.php';
 .breadcrumb li a {
     color: var(--dark-grey);
     font-size: 14px;
+    text-decoration: none;
 }
 
 .breadcrumb li a.active {
-    color: var(--blue); /* Warna khusus untuk halaman aktif */
+    color: var(--blue);
     font-weight: 600;
 }
 
@@ -118,11 +148,11 @@ $page = 'user.php';
                 <form action="" method="POST" enctype="multipart/form-data">
                     <div class="form-group">
                         <label>Nama Lengkap</label>
-                        <input type="text" name="nama_lengkap" value="<?= $data['nama_lengkap']; ?>" required>
+                        <input type="text" name="nama_lengkap" value="<?= htmlspecialchars($data['nama_lengkap']); ?>" required>
                     </div>
                     <div class="form-group">
                         <label>Username</label>
-                        <input type="text" name="username" value="<?= $data['username']; ?>" required>
+                        <input type="text" name="username" value="<?= htmlspecialchars($data['username']); ?>" required>
                     </div>
                     <div class="form-group">
                         <label>Password (Kosongkan jika tidak ingin diubah)</label>
@@ -136,16 +166,22 @@ $page = 'user.php';
                             <option value="admin" <?= $data['role'] == 'admin' ? 'selected' : ''; ?>>Admin</option>
                         </select>
                     </div>
-                    <div class="form-group" id="unit_box" style="<?= $data['role'] == 'admin' ? 'display:none;' : ''; ?>">
+                    
+                    <div class="form-group" id="unit_box">
                         <label>Unit Kerja</label>
                         <select name="id_unit">
-                            <?php while($u = mysqli_fetch_assoc($units)) : ?>
+                            <option value="" disabled>-- Pilih Unit Kerja --</option>
+                            <?php 
+                            mysqli_data_seek($units, 0);
+                            while($u = mysqli_fetch_assoc($units)) : 
+                            ?>
                                 <option value="<?= $u['id_unit']; ?>" <?= $data['id_unit'] == $u['id_unit'] ? 'selected' : ''; ?>>
                                     <?= $u['nama_unit']; ?>
                                 </option>
                             <?php endwhile; ?>
                         </select>
                     </div>
+
                     <div class="form-group">
                         <label>Status Akun</label>
                         <select name="status">
@@ -156,11 +192,11 @@ $page = 'user.php';
                     <div class="form-group">
                         <label>Foto Profil Baru (Opsional)</label>
                         <input type="file" name="foto" accept="image/*">
-                        <small>Foto saat ini: <?= $data['foto']; ?></small>
+                        <small style="display: block; margin-top: 5px; color: var(--dark-grey);">Foto saat ini: <strong><?= $data['foto']; ?></strong></small>
                     </div>
-                    <div class="form-action">
+                    <div class="form-action" style="margin-top: 30px;">
                         <button type="submit" name="update" class="btn-save">Update User</button>
-                        <a href="data_user.php" class="btn-cancel">Batal</a>
+                        <a href="data_user.php" class="btn-cancel" style="text-decoration: none;">Batal</a>
                     </div>
                 </form>
             </div>
@@ -171,8 +207,18 @@ $page = 'user.php';
         function toggleUnit() {
             var role = document.getElementById('role_select').value;
             var unitBox = document.getElementById('unit_box');
-            unitBox.style.display = (role === 'admin') ? 'none' : 'block';
+            var unitSelect = unitBox.querySelector('select[name="id_unit"]');
+
+            if (role === 'admin' || role === 'pimpinan') {
+                unitBox.style.display = 'none';
+                unitSelect.disabled = true;
+            } else {
+                unitBox.style.display = 'block';
+                unitSelect.disabled = false;
+            }
         }
+        // Jalankan fungsi saat halaman dimuat pertama kali untuk menyesuaikan data user yang ditarik
+        window.onload = toggleUnit;
     </script>
     <script src="../../assets/js/script.js"></script>
 </body>

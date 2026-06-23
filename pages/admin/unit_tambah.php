@@ -99,7 +99,7 @@ $page = 'data_unit.php';
                 <form action="" method="POST">
                     <div class="form-group">
                         <label>Nama Unit Kerja</label>
-                        <input type="text" name="nama_unit" placeholder="Contoh: Klaster 2 (Ibu dan Anak)" required autocomplete="off">
+                        <input type="text" name="nama_unit" placeholder="Contoh: Pelayana Raawat Inap" required autocomplete="off">
                     </div>
 
                     <div class="form-action">

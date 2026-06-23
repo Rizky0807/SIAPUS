@@ -7,6 +7,7 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
 }
 
 include "../../config/koneksi.php";
+/** @var mysqli $koneksi */
 
 // Ambil ID dari URL
 $id = $_GET['id'];

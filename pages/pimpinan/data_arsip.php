@@ -5,6 +5,9 @@ if (!isset($_SESSION['login'])) {
   exit;
 }
 include "../../config/koneksi.php";
+if (!isset($koneksi)) {
+  die("Database connection error. Please check your configuration.");
+}
 
 $role = $_SESSION['role'];
 $id_unit_user = $_SESSION['id_unit'];
@@ -73,13 +76,13 @@ $page = 'data_arsip.php';
 
       <form action="" method="GET" id="filterForm" class="filter-container" style="background: var(--light); padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
         <div class="filter-group" style="display: flex; flex-direction: column; gap: 5px;">
-          <label style="font-size: 12px; font-weight: 600;">Cari Arsip</label>
+          <label style="font-size: 12px; font-weight: 600; color: var(--dark);">Cari Arsip</label>
           <input type="text" name="search" id="searchInput" placeholder="Judul atau Kode..." value="<?= $keyword; ?>" autocomplete="off" style="padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 200px;">
         </div>
 
         <?php if ($role == 'admin' || $role == 'pimpinan') : ?>
           <div class="filter-group" style="display: flex; flex-direction: column; gap: 5px;">
-            <label style="font-size: 12px; font-weight: 600;">Unit Kerja</label>
+            <label style="font-size: 12px; font-weight: 600; color: var(--dark);">Unit Kerja</label>
             <select name="filter_unit" onchange="this.form.submit()" style="padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
               <option value="">Semua Unit</option>
               <?php while ($u = mysqli_fetch_assoc($units)) : ?>
@@ -90,7 +93,7 @@ $page = 'data_arsip.php';
         <?php endif; ?>
 
         <div class="filter-group" style="display: flex; flex-direction: column; gap: 5px;">
-          <label style="font-size: 12px; font-weight: 600;">Kategori</label>
+          <label style="font-size: 12px; font-weight: 600; color: var(--dark);">Kategori</label>
           <select name="filter_kategori" onchange="this.form.submit()" style="padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
             <option value="">Semua Kategori</option>
             <?php while ($k = mysqli_fetch_assoc($kats)) : ?>

@@ -5,6 +5,7 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'petugas') {
     exit;
 }
 include "../../config/koneksi.php";
+/** @var mysqli $koneksi */
 
 $id_unit = $_SESSION['id_unit'];
 $nama_user = $_SESSION['nama'];

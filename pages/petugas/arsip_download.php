@@ -1,6 +1,7 @@
 <?php
 session_start();
 include "../../config/koneksi.php";
+/** @var mysqli $koneksi */
 
 if (!isset($_SESSION['login'])) { exit; }
 

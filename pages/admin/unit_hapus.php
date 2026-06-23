@@ -1,3 +1,8 @@
+<?php
+
+include "../../config/koneksi.php";
+/** @var mysqli $koneksi */
+
 if (isset($_GET['hapus'])) {
 $id_hapus = mysqli_real_escape_string($koneksi, $_GET['hapus']);
 
@@ -16,3 +21,5 @@ echo "<script>
 </script>";
 }
 }
+
+?>

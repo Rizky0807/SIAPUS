@@ -1,5 +1,5 @@
 <?php
-include '../../config/koneksi.php'; // Adjust the path to your database connection file
+include '../../config/koneksi.php'; 
 if (!isset($koneksi)) {
     die("Database connection not established. Please check 'koneksi.php'.");
 }

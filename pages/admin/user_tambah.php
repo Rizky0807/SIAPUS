@@ -7,6 +7,7 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
 }
 
 include "../../config/koneksi.php";
+/** @var mysqli $koneksi */
 
 // Ambil data unit kerja untuk dropdown
 $units = mysqli_query($koneksi, "SELECT * FROM unit_kerja ORDER BY nama_unit ASC");
@@ -19,8 +20,21 @@ if (isset($_POST['simpan'])) {
     $role = $_POST['role'];
     $status = 'aktif';
 
-    // Jika Admin, ID Unit diset NULL (karena admin memantau semua unit)
-    $id_unit = ($role == 'admin' || $role == 'pimpinan') ? "NULL" : "'" . $_POST['id_unit'] . "'";
+    // Inisialisasi default nilai unit
+    $id_unit = "NULL";
+    $nama_unit = "NULL";
+
+    if ($role === 'petugas' && !empty($_POST['id_unit'])) {
+        $id_unit_input = mysqli_real_escape_string($koneksi, $_POST['id_unit']);
+        $id_unit = "'" . $id_unit_input . "'";
+
+        $cari_nama_unit = mysqli_query($koneksi, "SELECT nama_unit FROM unit_kerja WHERE id_unit = '$id_unit_input'");
+        $data_unit = mysqli_fetch_assoc($cari_nama_unit);
+        
+        if ($data_unit) {
+            $nama_unit = "'" . mysqli_real_escape_string($koneksi, $data_unit['nama_unit']) . "'";
+        }
+    }
 
     // Proses Upload Foto Profil
     $foto_name = "default.jpg";
@@ -31,13 +45,12 @@ if (isset($_POST['simpan'])) {
         move_uploaded_file($_FILES['foto']['tmp_name'], $target);
     }
 
-    // Cek apakah username sudah ada
     $cek_user = mysqli_query($koneksi, "SELECT * FROM users WHERE username = '$username'");
     if (mysqli_num_rows($cek_user) > 0) {
         echo "<script>alert('Username sudah digunakan, cari yang lain!');</script>";
     } else {
-        $insert = mysqli_query($koneksi, "INSERT INTO users (username, password, nama_lengkap, id_unit, role, foto, status) 
-                  VALUES ('$username', '$password', '$nama', $id_unit, '$role', '$foto_name', '$status')");
+        $insert = mysqli_query($koneksi, "INSERT INTO users (username, password, nama_lengkap, id_unit, nama_unit, role, foto, status) 
+                  VALUES ('$username', '$password', '$nama', $id_unit, $nama_unit, '$role', '$foto_name', '$status')");
 
         if ($insert) {
             echo "<script>alert('Akun user berhasil dibuat!'); window.location='data_user.php';</script>";
@@ -47,7 +60,7 @@ if (isset($_POST['simpan'])) {
     }
 }
 
-$page = 'user.php';
+$page = 'data_user.php';
 ?>
 
 <!DOCTYPE html>
@@ -62,19 +75,16 @@ $page = 'user.php';
 </head>
 
 <style>
-    /* Styling Breadcrumb agar Sejajar */
     .breadcrumb {
         display: flex;
         align-items: center;
         grid-gap: 10px;
-        /* Jarak antar elemen */
         margin-top: 10px;
     }
 
     .breadcrumb li {
         color: var(--dark);
         list-style: none;
-        /* Menghilangkan titik list */
         display: flex;
         align-items: center;
     }
@@ -82,11 +92,11 @@ $page = 'user.php';
     .breadcrumb li a {
         color: var(--dark-grey);
         font-size: 14px;
+        text-decoration: none;
     }
 
     .breadcrumb li a.active {
         color: var(--blue);
-        /* Warna khusus untuk halaman aktif */
         font-weight: 600;
     }
 
@@ -167,7 +177,7 @@ $page = 'user.php';
                         <button type="submit" name="simpan" class="btn-save">
                             <i class='bx bxs-user-check'></i> Buat Akun Sekarang
                         </button>
-                        <a href="data_user.php" class="btn-cancel">
+                        <a href="data_user.php" class="btn-cancel" style="text-decoration: none;">
                             <i class='bx bx-x'></i> Batal
                         </a>
                     </div>
@@ -177,17 +187,21 @@ $page = 'user.php';
     </section>
 
     <script>
-        // Fungsi JS untuk sembunyikan dropdown unit jika role yang dipilih adalah Admin
         function toggleUnitField() {
             var role = document.getElementById('role_select').value;
             var unitField = document.getElementById('unit_field');
+            var unitSelect = unitField.querySelector('select[name="id_unit"]');
 
-            if (role === 'admin' || role == 'pimpinan') {
+            if (role === 'admin' || role === 'pimpinan') {
                 unitField.style.display = 'none';
+                unitSelect.disabled = true;
+                unitSelect.value = "";
             } else {
                 unitField.style.display = 'block';
+                unitSelect.disabled = false;
             }
         }
+        window.onload = toggleUnitField;
     </script>
     <script src="../../assets/js/script.js"></script>
 </body>
