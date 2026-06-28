@@ -31,7 +31,7 @@ if (isset($_POST['simpan'])) {
 
 <style>
     /* Styling Breadcrumb agar Sejajar */
-.breadcrumb {
+    .breadcrumb {
     display: flex;
     align-items: center;
     grid-gap: 10px; /* Jarak antar elemen */
@@ -64,30 +64,44 @@ if (isset($_POST['simpan'])) {
     <?php include '../partials/sidebar.php'; ?>
     <section id="content">
         <?php include '../partials/navbar.php'; ?>
+
         <main>
-        <div class="head-title">
+            <div class="head-title">
                 <div class="left">
                     <h1>Tambah Kategori</h1>
                     <ul class="breadcrumb">
-                        <li><a href="data_kategori.php">Data Kategori</a></li>
+                        <li><a href="data_unit.php">Data Kategori</a></li>
                         <li><i class='bx bx-chevron-right'></i></li>
-                        <li><a class="active" href="#">Edit Kategori</a></li>
+                        <li><a class="active" href="#">Tambah Data</a></li>
                     </ul>
                 </div>
             </div>
+
             <div class="form-box">
+                <div class="head" style="margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                    <h3 style="color: var(--dark); font-size: 18px;">Form Tambah Kategori Arsip</h3>
+                    <p style="font-size: 13px; color: var(--dark-grey);">Masukkan Nama Kategori Arsip</p>
+                </div>
+
                 <form action="" method="POST">
                     <div class="form-group">
-                        <label>Nama Kategori</label>
-                        <input type="text" name="nama_kategori" placeholder="Misal: Surat Keputusan" required>
+                        <label>Nama Kategori Arsip</label>
+                        <input type="text" name="nama_kategori" placeholder="Contoh: Surat Keputusan" required autocomplete="off">
                     </div>
+
                     <div class="form-action">
-                        <button type="submit" name="simpan" class="btn-save">Simpan</button>
-                        <a href="data_kategori.php" class="btn-cancel">Batal</a>
+                        <button type="submit" name="simpan" class="btn-save">
+                            <i class='bx bxs-save'></i> Simpan Kategori
+                        </button>
+                        <a href="data_kategori.php" class="btn-cancel">
+                            <i class='bx bx-arrow-back'></i> Batal
+                        </a>
                     </div>
                 </form>
             </div>
         </main>
     </section>
+
 </body>
+<script src="../../assets/js/script.js"></script>
 </html>

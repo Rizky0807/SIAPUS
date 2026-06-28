@@ -105,6 +105,10 @@ $page = 'kategori.php';
             </div>
 
             <div class="form-box">
+                <div class="head" style="margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                    <h3 style="color: var(--dark); font-size: 18px;">Form Edit Kategori Arsip</h3>
+                    <p style="font-size: 13px; color: var(--dark-grey);">Masukkan Perubahan Kategori Arsip.</p>
+                </div>
                 <form action="" method="POST">
                     <div class="form-group">
                         <label>Nama Kategori Arsip</label>
