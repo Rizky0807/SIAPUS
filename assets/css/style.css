@@ -24,7 +24,7 @@ li {
   --grey: #eee;
   --dark-grey: #AAAAAA;
   --dark: #000000;
-  --red: #000000;
+  --red: rgb(255, 0, 25);
   --yellow: #FFCE26;
   --light-yellow: #FFF2C6;
   --orange: #FD7238;
@@ -34,8 +34,9 @@ li {
 }
 
 html {
-  overflow-x: hidden;
+  overflow-x: hidden !important;
 }
+
 
 /* DARK MODE SETUP */
 body.dark,

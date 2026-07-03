@@ -28,7 +28,7 @@ if (isset($_SESSION['login'])) {
 
         <div class="form-container sign-up">
             <form action="process/login_process.php" method="POST">
-                <h1 id="login-title">Login Petugas</h1>
+                <h1 id="login-title">Login Unit</h1>
                 <p id="login-desc">Silakan masuk untuk mengelola arsip unit Anda.</p>
 
                 <select name="role" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #e0e0e0; background: #f8f9fa; outline: none; font-size: 14px;">

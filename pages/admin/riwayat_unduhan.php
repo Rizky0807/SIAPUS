@@ -17,11 +17,21 @@ if (!isset($koneksi)) {
 $role = $_SESSION['role'];
 $nama_admin = $_SESSION['nama'] ?? 'Administrator';
 
-// Query Join untuk mendapatkan detail arsip yang diunduh
-$query_log = mysqli_query($koneksi, "SELECT l.*, a.nama_arsip, a.kode_arsip 
-                                     FROM log_download l 
-                                     JOIN arsip a ON l.id_arsip = a.id_arsip 
-                                     ORDER BY l.waktu_download DESC");
+// INI FITUR FILTERNYA: Inisialisasi Filter Rentang Waktu
+$tgl_awal = $_GET['tgl_awal'] ?? '';
+$tgl_akhir = $_GET['tgl_akhir'] ?? '';
+
+// Query Dasar Join Log
+$query_base = "SELECT l.*, a.nama_arsip, a.kode_arsip 
+               FROM log_download l 
+               JOIN arsip a ON l.id_arsip = a.id_arsip WHERE 1=1";
+
+// Masukkan filter tanggal ke dalam query log jika dipilih
+if ($tgl_awal != '' && $tgl_akhir != '') {
+    $query_base .= " AND DATE(l.waktu_download) BETWEEN '$tgl_awal' AND '$tgl_akhir'";
+}
+
+$query_log = mysqli_query($koneksi, $query_base . " ORDER BY l.waktu_download DESC");
 
 // Logika Hapus Riwayat (admin only)
 if (isset($_GET['hapus_semua']) && $_SESSION['role'] == 'admin') {
@@ -109,6 +119,38 @@ $page = 'riwayat.php';
         letter-spacing: 0.5px;
     }
 
+    /* Styling Filter Form Agar Rapi Sejajar Bawaan Template */
+    .filter-card-custom {
+        background: var(--white-card, #fff);
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-group-custom {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .form-group-custom label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--dark-grey);
+    }
+
+    .form-group-custom input {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background: var(--light);
+        color: var(--dark);
+        outline: none;
+        height: 35px;
+        box-sizing: border-box;
+    }
+
     .print-only {
         display: none !important;
     }
@@ -120,7 +162,8 @@ $page = 'riwayat.php';
         #navbar,
         header,
         .breadcrumb,
-        .action-box{ 
+        .filter-card-custom,
+        .action-box { 
             display: none !important; 
         }
 
@@ -263,12 +306,33 @@ $page = 'riwayat.php';
                         <td style="border: none !important; padding: 2px !important;"><strong>Status Log</strong></td>
                         <td style="border: none !important; padding: 2px !important;">:</td>
                         <td style="border: none !important; padding: 2px !important;">Audit Trail Sistem Global</td>
-                        <td style="border: none !important; padding: 2px !important;"><strong>Waktu Cetak</strong></td>
+                        <td style="border: none !important; padding: 2px !important;"><strong>Periode Log</strong></td>
                         <td style="border: none !important; padding: 2px !important;">:</td>
-                        <td style="border: none !important; padding: 2px !important;"><?= date('d/m/Y H:i'); ?> WIB</td>
+                        <td style="border: none !important; padding: 2px !important;">
+                            <?= ($tgl_awal != '' && $tgl_akhir != '') ? date('d/m/Y', strtotime($tgl_awal)) . " s/d " . date('d/m/Y', strtotime($tgl_akhir)) : "Semua Periode"; ?>
+                        </td>
                     </tr>
                 </table>
                 <hr style="border: 1px solid #000; margin-top: 15px;">
+            </div>
+
+            <!-- 💡 FITUR FILTER BARU DENGAN ALIGN-ITEMS FLEX-END -->
+            <div class="filter-card-custom">
+                <form action="" method="GET" style="display: flex; gap: 15px; flex-wrap: wrap; width: 100%; align-items: flex-end;">
+                    <div class="form-group-custom">
+                        <label>Periode Mulai</label>
+                        <input type="date" name="tgl_awal" value="<?= $tgl_awal; ?>" onchange="this.form.submit()" style="cursor: pointer;">
+                    </div>
+                    <div class="form-group-custom">
+                        <label>Periode Akhir</label>
+                        <input type="date" name="tgl_akhir" value="<?= $tgl_akhir; ?>" onchange="this.form.submit()" style="cursor: pointer;">
+                    </div>
+                    <div class="form-group-custom">
+                        <a href="riwayat_unduhan.php" class="btn-action-custom" style="background: #e2e8f0; color: #334155 !important; border-radius: 8px; height: 35px; padding: 0 15px;">
+                            <i class='bx bx-refresh' style="font-size: 18px;"></i> Reset
+                        </a>
+                    </div>
+                </form>
             </div>
 
             <div class="table-data">
@@ -311,7 +375,7 @@ $page = 'riwayat.php';
                             ?>
                             <tr>
                                 <td colspan="5" style="text-align: center; padding: 30px; color: var(--dark-grey);">
-                                    Belum ada aktivitas unduhan yang tercatat.
+                                    Belum ada aktivitas unduhan yang tercatat pada periode ini.
                                 </td>
                             </tr>
                             <?php endif; ?>

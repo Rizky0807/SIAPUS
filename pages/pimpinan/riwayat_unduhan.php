@@ -2,26 +2,37 @@
 session_start();
 date_default_timezone_set('Asia/Jakarta');
 
+// Proteksi halaman khusus pimpinan resmi
 if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'pimpinan') {
     header("Location: ../../index.php");
     exit;
 }
 
 include "../../config/koneksi.php";
-/** @var mysqli $koneksi */
 
+/** @var mysqli $koneksi */
 if (!isset($koneksi)) {
     die("Database connection error. Please check the configuration in 'koneksi.php'.");
 }
 
 $role = $_SESSION['role'];
-$nama_user = $_SESSION['nama'];
+$nama_user = $_SESSION['nama'] ?? 'Pimpinan';
 
-// Query Join untuk mendapatkan detail arsip yang diunduh (Sama persis dengan struktur Admin)
-$query_log = mysqli_query($koneksi, "SELECT l.*, a.nama_arsip, a.kode_arsip 
-                                     FROM log_download l 
-                                     JOIN arsip a ON l.id_arsip = a.id_arsip 
-                                     ORDER BY l.waktu_download DESC");
+// FITUR FILTERNYA: Inisialisasi Filter Rentang Waktu
+$tgl_awal = $_GET['tgl_awal'] ?? '';
+$tgl_akhir = $_GET['tgl_akhir'] ?? '';
+
+// Query Dasar Join Log
+$query_base = "SELECT l.*, a.nama_arsip, a.kode_arsip 
+               FROM log_download l 
+               JOIN arsip a ON l.id_arsip = a.id_arsip WHERE 1=1";
+
+// Masukkan filter tanggal ke dalam query log jika dipilih oleh pimpinan
+if ($tgl_awal != '' && $tgl_akhir != '') {
+    $query_base .= " AND DATE(l.waktu_download) BETWEEN '$tgl_awal' AND '$tgl_akhir'";
+}
+
+$query_log = mysqli_query($koneksi, $query_base . " ORDER BY l.waktu_download DESC");
 
 $page = 'riwayat_download.php';
 ?>
@@ -31,11 +42,32 @@ $page = 'riwayat_download.php';
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/boxicons-2.1.4/css/boxicons.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
     <title>Riwayat Unduhan - SIAPSIJUNJUNG</title>
 </head>
 <style>
+    /* 💡 KUNCI LAYAR SATU HALAMAN PENUH DESKTOP SINKRON VERSION KHAS SIAPUS */
+    html, body {
+        height: 100vh;
+        overflow: hidden !important;
+    }
+
+    #content main {
+        height: calc(100vh - 56px);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        padding: 24px;
+        box-sizing: border-box;
+    }
+
+    .head-title {
+        flex-shrink: 0;
+        margin-bottom: 20px !important;
+    }
+
     /* Styling Breadcrumb agar Sejajar */
     .breadcrumb {
         display: flex;
@@ -77,9 +109,8 @@ $page = 'riwayat_download.php';
     /* Standardisasi Desain Tombol Aksi */
     .btn-action-custom {
         height: 36px;
-        padding: 0 18px;
+        padding: 0 16px;
         border-radius: 36px;
-        /* Menyamakan tipe tombol elips dinamis */
         font-size: 14px;
         font-weight: 600;
         display: inline-flex;
@@ -99,33 +130,94 @@ $page = 'riwayat_download.php';
         transform: translateY(-1px);
     }
 
-    .head h3{
-        font-size: 18px;
+    .head h3 {
+        font-size: 14px;
         font-weight: 700;
         color: var(--dark);
         margin-bottom: 10px;
         text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Styling Filter Form Pas Sejajar Bawaan Template Laporan */
+    .filter-card-custom {
+        background: var(--white-card, #fff);
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        flex-shrink: 0;
+    }
+
+    .form-group-custom {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .form-group-custom label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--dark-grey);
+    }
+
+    .form-group-custom input {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background: var(--light);
+        color: var(--dark);
+        outline: none;
+        height: 35px;
+        box-sizing: border-box;
+    }
+
+    /* CONFIG SCROLL INTERNAL MANDIRI KHAS DATA ARSIP */
+    .table-data {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        min-height: 0;
+    }
+
+    .table-data .order {
+        flex-grow: 1;
+        overflow-y: auto;
+        min-height: 0;
+    }
+
+    .table-data .order table th {
+        position: sticky;
+        top: 0;
+        background: var(--white-card, #fff);
+        z-index: 10;
+    }
+
+    .table-data .order::-webkit-scrollbar {
+        width: 5px;
+    }
+    .table-data .order::-webkit-scrollbar-thumb {
+        background: var(--dark-grey);
+        border-radius: 5px;
     }
 
     .print-only {
         display: none !important;
     }
 
-    /* CETAK/PRINT PREVIEW */
+    /* CETAK/PRINT PREVIEW LEMBARAN KERTAS */
     @media print {
-
         #sidebar,
         nav,
         #navbar,
         header,
         .breadcrumb,
-        .action-box{
+        .filter-card-custom,
+        .action-box {
             display: none !important;
         }
 
-        #content,
-        main,
-        body {
+        #content, main, body {
             width: 100% !important;
             left: 0 !important;
             padding: 0 !important;
@@ -150,8 +242,7 @@ $page = 'riwayat_download.php';
             margin-top: 15px;
         }
 
-        .table-data,
-        .order {
+        .table-data, .order {
             box-shadow: none !important;
             margin: 0 !important;
             padding: 0 !important;
@@ -176,8 +267,7 @@ $page = 'riwayat_download.php';
             page-break-after: auto !important;
         }
 
-        th,
-        td {
+        th, td {
             border: 1px solid #000 !important;
             padding: 8px !important;
             font-size: 12px !important;
@@ -257,14 +347,33 @@ $page = 'riwayat_download.php';
                         <td style="border: none !important; padding: 2px !important;"><strong>Status Akses</strong></td>
                         <td style="border: none !important; padding: 2px !important;">:</td>
                         <td style="border: none !important; padding: 2px !important;">Pimpinan Resmi (Hak Audit Trail)</td>
-                        <td style="border: none !important; padding: 2px !important;"><strong>Waktu Cetak</strong></td>
+                        <td style="border: none !important; padding: 2px !important;"><strong>Periode Log</strong></td>
                         <td style="border: none !important; padding: 2px !important;">:</td>
-                        <td style="border: none !important; padding: 2px !important;"><?= date('d/m/Y H:i'); ?> WIB</td>
+                        <td style="border: none !important; padding: 2px !important;">
+                            <?= ($tgl_awal != '' && $tgl_akhir != '') ? date('d/m/Y', strtotime($tgl_awal)) . " s/d " . date('d/m/Y', strtotime($tgl_akhir)) : "Semua Periode"; ?>
+                        </td>
                     </tr>
                 </table>
                 <hr style="border: 1px solid #000; margin-top: 15px;">
             </div>
 
+            <div class="filter-card-custom">
+                <form action="" method="GET" style="display: flex; gap: 15px; flex-wrap: wrap; width: 100%; align-items: flex-end;">
+                    <div class="form-group-custom">
+                        <label>Periode Mulai</label>
+                        <input type="date" name="tgl_awal" value="<?= $tgl_awal; ?>" onchange="this.form.submit()" style="cursor: pointer;">
+                    </div>
+                    <div class="form-group-custom">
+                        <label>Periode Akhir</label>
+                        <input type="date" name="tgl_akhir" value="<?= $tgl_akhir; ?>" onchange="this.form.submit()" style="cursor: pointer;">
+                    </div>
+                    <div class="form-group-custom">
+                        <a href="riwayat_unduhan.php" class="btn-action-custom" style="background: #e2e8f0; color: #334155 !important; border-radius: 8px; height: 35px; padding: 0 15px;">
+                            <i class='bx bx-refresh' style="font-size: 18px;"></i> Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
 
             <div class="table-data">
                 <div class="order">
@@ -306,7 +415,7 @@ $page = 'riwayat_download.php';
                                 ?>
                                 <tr>
                                     <td colspan="5" style="text-align: center; padding: 30px; color: var(--dark-grey);">
-                                        Belum ada aktivitas unduhan yang tercatat.
+                                        Belum ada aktivitas unduhan yang tercatat pada periode ini.
                                     </td>
                                 </tr>
                             <?php endif; ?>

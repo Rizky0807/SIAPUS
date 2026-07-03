@@ -192,9 +192,9 @@ $page = 'data_user.php';
                     <div class="form-group">
                         <label>Foto Profil Baru (Opsional)</label>
                         <input type="file" name="foto" accept="image/*">
-                        <small style="display: block; margin-top: 5px; color: var(--dark-grey);">Foto saat ini: <strong><?= $data['foto']; ?></strong></small>
+                        <small style="display: block; color: var(--dark-grey);">Foto saat ini: <strong><?= $data['foto']; ?></strong></small>
                     </div>
-                    <div class="form-action" style="margin-top: 30px;">
+                    <div class="form-action">
                         <button type="submit" name="update" class="btn-save">Update User</button>
                         <a href="data_user.php" class="btn-cancel" style="text-decoration: none;">Batal</a>
                     </div>

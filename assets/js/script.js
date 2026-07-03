@@ -46,7 +46,7 @@ window.addEventListener('resize', function () {
     }
 });
 
-// DARK MODE LOGIC (FIXED)
+// DARK MODE LOGIC 
 const switchMode = document.getElementById('switch-mode');
 
 function setCookie(name, value, days) {
@@ -57,7 +57,6 @@ function setCookie(name, value, days) {
 }
 
 if (switchMode) {
-    // Sinkronkan status checkbox dengan LocalStorage saat halaman dimuat
     if (localStorage.getItem('theme') === 'dark') {
         switchMode.checked = true;
     }
@@ -66,8 +65,8 @@ if (switchMode) {
         if (this.checked) {
             document.body.classList.add('dark');
             document.documentElement.classList.add('dark-mode-active');
-            setCookie('theme', 'dark', 30); // Untuk dibaca PHP
-            localStorage.setItem('theme', 'dark'); // Untuk dibaca JS
+            setCookie('theme', 'dark', 30); 
+            localStorage.setItem('theme', 'dark'); 
         } else {
             document.body.classList.remove('dark');
             document.documentElement.classList.remove('dark-mode-active');
@@ -77,7 +76,7 @@ if (switchMode) {
     });
 }
 
-// JAM DIGITAL REAL-TIME UNTUK DASHBOARD
+// fix clock
 function updateClock() {
     const clockElement = document.getElementById('clock');
     if (clockElement) {

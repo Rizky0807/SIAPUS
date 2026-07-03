@@ -57,9 +57,140 @@ $page = 'data_arsip.php';
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../assets/boxicons-2.1.4/css/boxicons.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
     <title>Data Arsip - SIAPSIJUNJUNG</title>
+    <style>
+        /* 💡 KUNCI LAYAR SATU HALAMAN PENUH DESKTOP SINKRON VERSION */
+        html, body {
+            height: 100vh;
+            overflow: hidden !important;
+        }
+
+        #content main {
+            height: calc(100vh - 56px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            box-sizing: border-box;
+        }
+
+        .head-title {
+            flex-shrink: 0;
+            margin-bottom: 20px !important;
+        }
+
+        /* CONTAINER FILTER SEJAJAR FLAT */
+        .filter-container-petugas {
+            background: var(--white-card, #fff);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+        }
+
+        .filter-group-custom {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group-custom label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .filter-group-custom select,
+        .filter-group-custom input {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--light);
+            color: var(--dark);
+            outline: none;
+            height: 38px;
+            box-sizing: border-box;
+        }
+
+        /* SCROLL INTERNAL TABEL DATA ARSIP */
+        .table-data {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-height: 0;
+        }
+
+        .table-data .order {
+            flex-grow: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .table-data .order table th {
+            position: sticky;
+            top: 0;
+            background: var(--white-card, #fff);
+            z-index: 10;
+        }
+
+        .table-data .order::-webkit-scrollbar {
+            width: 5px;
+        }
+        .table-data .order::-webkit-scrollbar-thumb {
+            background: var(--dark-grey);
+            border-radius: 5px;
+        }
+
+        /* 💡 MODIFIKASI GRUP BUTTON AKSI PREMIUM OUTLINE */
+        .action-flex-group {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-action-view {
+            background: transparent;
+            color: #DB504A;
+            border: 1.5px solid #DB504A;
+            padding: 6px 10px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            font-size: 15px;
+            transition: all 0.2s ease;
+        }
+        .btn-action-view:hover {
+            background: #DB504A;
+            color: #ffffff !important;
+        }
+
+        .btn-action-download {
+            background: transparent;
+            color: #4cbb17;
+            border: 1.5px solid #4cbb17;
+            padding: 6px 10px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            font-size: 15px;
+            transition: all 0.2s ease;
+        }
+        .btn-action-download:hover {
+            background: #4cbb17;
+            color: #ffffff !important;
+        }
+
+    </style>
 </head>
 
 <body>
@@ -72,43 +203,42 @@ $page = 'data_arsip.php';
                     <h1>Data Arsip Digital</h1>
                 </div>
                 <?php if ($role != 'pimpinan') : ?>
-                    <a href="arsip_tambah.php" class="btn-add"><i class='bx bx-cloud-upload'></i><span class="text">Upload Arsip</span></a>
+                    <a href="arsip_tambah.php" class="btn-add" style="text-decoration: none;"><i class='bx bx-cloud-upload'></i><span class="text">Upload Arsip</span></a>
                 <?php endif; ?>
             </div>
 
-            <form action="" method="GET" id="filterForm" style="background: var(--light); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
-
-                <div style="display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 200px;">
-                    <label style="font-size: 12px; font-weight: 600; color: var(--dark-grey);">CARI ARSIP</label>
+            <form action="" method="GET" class="filter-container-petugas" id="filterForm">
+                <div class="filter-group-custom" style="flex: 1; min-width: 200px;">
+                    <label>CARI ARSIP</label>
                     <div style="position: relative; display: flex; align-items: center;">
                         <i class='bx bx-search' style="position: absolute; left: 12px; color: var(--dark-grey); font-size: 18px;"></i>
-                        <input type="text" name="search" id="searchInput" placeholder="Nama atau kode arsip..." value="<?= htmlspecialchars($keyword); ?>" autocomplete="off" style="padding: 10px 10px 10px 38px; border-radius: 8px; border: 1px solid #ddd; width: 100%; font-size: 14px; outline: none;">
+                        <input type="text" name="search" id="searchInput" placeholder="Nama atau kode arsip..." value="<?= htmlspecialchars($keyword); ?>" autocomplete="off" style="padding-left: 38px; width: 100%;">
                     </div>
                 </div>
 
                 <?php if ($role == 'admin' || $role == 'pimpinan') : ?>
-                    <div style="display: flex; flex-direction: column; gap: 5px; min-width: 180px;">
-                        <label style="font-size: 12px; font-weight: 600; color: var(--dark-grey);">UNIT KERJA</label>
-                        <select name="filter_unit" onchange="this.form.submit()" style="padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; background: #fff; cursor: pointer;">
+                    <div class="filter-group-custom" style="min-width: 180px;">
+                        <label>UNIT KERJA</label>
+                        <select name="filter_unit" onchange="this.form.submit()">
                             <option value="">Semua Unit</option>
                             <?php while ($u = mysqli_fetch_assoc($units)) : ?>
-                                <option value="<?= $u['id_unit']; ?>" <?= ($f_unit == $u['id_unit']) ? 'selected' : ''; ?>><?= $u['nama_unit']; ?></option>
+                                <option value="<?= $u['id_unit']; ?>" <?= ($f_unit == $u['id_unit']) ? 'selected' : ''; ?>><?= htmlspecialchars($u['nama_unit']); ?></option>
                             <?php endwhile; ?>
                         </select>
                     </div>
                 <?php endif; ?>
 
-                <div style="display: flex; flex-direction: column; gap: 5px; min-width: 180px;">
-                    <label style="font-size: 12px; font-weight: 600; color: var(--dark-grey);">KATEGORI</label>
-                    <select name="filter_kategori" onchange="this.form.submit()" style="padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; background: #fff; cursor: pointer;">
+                <div class="filter-group-custom" style="min-width: 180px;">
+                    <label>KATEGORI</label>
+                    <select name="filter_kategori" onchange="this.form.submit()">
                         <option value="">Semua Kategori</option>
                         <?php while ($k = mysqli_fetch_assoc($kats)) : ?>
-                            <option value="<?= $k['id_kategori']; ?>" <?= ($f_kat == $k['id_kategori']) ? 'selected' : ''; ?>><?= $k['nama_kategori']; ?></option>
+                            <option value="<?= $k['id_kategori']; ?>" <?= ($f_kat == $k['id_kategori']) ? 'selected' : ''; ?>><?= htmlspecialchars($k['nama_kategori']); ?></option>
                         <?php endwhile; ?>
                     </select>
                 </div>
 
-                <a href="data_arsip.php" style="padding: 11px 20px; text-decoration: none; border-radius: 8px; background: #eee; color: #333; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                <a href="data_arsip.php" class="btn-cancel" style="padding: 10px 15px; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border-color);">
                     <i class='bx bx-refresh' style="font-size: 18px;"></i> Reset
                 </a>
             </form>
@@ -118,18 +248,19 @@ $page = 'data_arsip.php';
                     <table>
                         <thead>
                             <tr>
-                                <th width="60">No</th>
-                                <th>Kode</th>
+                                <th style="width: 50px; text-align: center;">No</th>
+                                <th style="width: 110px;">Kode</th>
                                 <th>Nama Arsip</th>
 
                                 <?php if ($role == 'petugas') : ?>
-                                    <th>Kategori</th> <?php else : ?>
+                                    <th>Kategori</th> 
+                                <?php else : ?>
                                     <th>Unit Asal</th>
                                     <th>Kategori</th>
                                 <?php endif; ?>
 
-                                <th>Tgl Upload</th>
-                                <th style="text-align: center;">Aksi</th>
+                                <th style="width: 120px;">Tgl Upload</th>
+                                <th style="width: 180px; text-align: center;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -137,30 +268,34 @@ $page = 'data_arsip.php';
                                 <?php $no = 1;
                                 while ($row = mysqli_fetch_assoc($query_arsip)) : ?>
                                     <tr>
-                                        <td><?= $no++; ?></td>
-                                        <td><span style="font-family: monospace; font-weight: bold;"><?= $row['kode_arsip']; ?></span></td>
-                                        <td><?= htmlspecialchars($row['nama_arsip']); ?></td>
+                                        <td style="text-align: center; color: var(--dark-grey);"><?= $no++; ?></td>
+                                        <td><span style="font-family: monospace; font-weight: bold; color: var(--dark);"><?= htmlspecialchars($row['kode_arsip']); ?></span></td>
+                                        <td style="font-weight: 600; color: var(--dark);"><?= htmlspecialchars($row['nama_arsip']); ?></td>
 
                                         <?php if ($role == 'petugas') : ?>
-                                            <td><span class="status completed" style="background: #e1f5fe; color: #039be5; font-weight: 600;"><?= $row['nama_kategori'] ?? 'Belum Dikategorikan'; ?></span></td>
+                                            <td><span class="status pending" style=" color: var(--dark); font-weight: 600; padding: 4px 10px; border-radius: 20px; font-size: 12px;"><?= $row['nama_kategori'] ?? 'Belum Dikategorikan'; ?></span></td>
                                         <?php else : ?>
-                                            <td><?= $row['nama_unit'] ?? 'GLOBAL'; ?></td>
-                                            <td><span class="status completed" style="background: #e1f5fe; color: #039be5; font-weight: 600;"><?= $row['nama_kategori'] ?? 'Belum Dikategorikan'; ?></span></td>
+                                            <td><?= htmlspecialchars($row['nama_unit'] ?? 'GLOBAL'); ?></td>
+                                            <td><span class="status pending" style="background: rgba(230, 60, 60, 0.1); color: #3C91E6; font-weight: 600; padding: 4px 10px; border-radius: 20px; font-size: 12px;"><?= $row['nama_kategori'] ?? 'Belum Dikategorikan'; ?></span></td>
                                         <?php endif; ?>
 
-                                        <td><?= date('d/m/Y', strtotime($row['created_at'])); ?></td>
+                                        <td style="color: var(--dark ); font-size: 13px;"><?= date('d/m/Y', strtotime($row['created_at'])); ?></td>
                                         <td style="text-align: center;">
-                                            <div class="btn-group-action" style="display: flex; gap: 15px; justify-content: center;">
-                                                <a href="arsip_view.php?id=<?= $row['id_arsip']; ?>" title="Lihat Preview & Download">
-                                                    <i class='bx bx-show' style="color: #3C91E6; font-size: 22px;"></i>
+                                            <div class="action-flex-group">
+                                                <a href="arsip_view.php?id=<?= $row['id_arsip']; ?>" class="btn-action-view" title="Lihat Preview">
+                                                <i class='bx bxs-file-pdf'></i>
+                                                </a>
+                                                
+                                                <a href="arsip_download.php?id=<?= $row['id_arsip']; ?>" class="btn-action-download" title="Download Berkas">
+                                                    <i class='bx bx-download'></i>
                                                 </a>
 
                                                 <?php if ($role == 'admin') : ?>
-                                                    <a href="arsip_edit.php?id=<?= $row['id_arsip']; ?>" title="Edit">
-                                                        <i class='bx bxs-edit' style="color: #FFCE26; font-size: 22px;"></i>
+                                                    <a href="arsip_edit.php?id=<?= $row['id_arsip']; ?>" class="btn-action-edit" title="Edit">
+                                                        <i class='bx bxs-edit'></i>
                                                     </a>
-                                                    <a href="arsip_hapus.php?id=<?= $row['id_arsip']; ?>" onclick="return confirm('Yakin hapus arsip ini?')" title="Hapus">
-                                                        <i class='bx bxs-trash' style="color: #DB504A; font-size: 22px;"></i>
+                                                    <a href="arsip_hapus.php?id=<?= $row['id_arsip']; ?>" class="btn-action-delete" onclick="return confirm('Yakin hapus arsip ini?')" title="Hapus">
+                                                        <i class='bx bxs-trash'></i>
                                                     </a>
                                                 <?php endif; ?>
                                             </div>
@@ -169,7 +304,11 @@ $page = 'data_arsip.php';
                                 <?php endwhile; ?>
                             <?php else : ?>
                                 <tr>
-                                    <td colspan="7" style="text-align: center; padding: 20px; color: var(--dark-grey);">Data arsip tidak ditemukan.</td>
+                                    <td colspan="7" style="text-align: center; padding: 40px 0;">
+                                        <i class='bx bx-search-alt' style="font-size: 60px; color: var(--dark-grey); opacity: 0.3;"></i>
+                                        <h3 style="margin-top: 10px; color: var(--dark-grey); font-size: 16px;">Arsip Tidak Ditemukan</h3>
+                                        <p style="color: var(--dark-grey); font-size: 13px;">Maaf, tidak ada arsip terdaftar dalam kriteria pencarian.</p>
+                                    </td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -180,17 +319,17 @@ $page = 'data_arsip.php';
     </section>
 
     <script src="../../assets/js/script.js"></script>
-
     <script>
         const searchInput = document.getElementById('searchInput');
         const filterForm = document.getElementById('filterForm');
         let typingTimer;
+        const doneTypingInterval = 500; 
 
         searchInput.addEventListener('keyup', () => {
             clearTimeout(typingTimer);
             typingTimer = setTimeout(() => {
                 filterForm.submit();
-            }, 600);
+            }, doneTypingInterval);
         });
 
         const val = searchInput.value;

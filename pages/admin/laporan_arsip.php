@@ -361,7 +361,7 @@ $page = 'laporan.php';
                     <div class="filter-row">
                         <div class="form-group">
                             <label>Unit Kerja</label>
-                            <select name="filter_unit" onchange="this.form.submit()" class="form-control-custom" style="width: 200px; cursor: pointer;">
+                            <select name="filter_unit" onchange="this.form.submit()" class="form-control-custom" style="width: 375px; padding: 5px; cursor: pointer;">
                                 <option value="">-- Semua Unit --</option>
                                 <?php 
                                 mysqli_data_seek($units, 0); 
@@ -381,7 +381,7 @@ $page = 'laporan.php';
                         </div>
                         <div class="form-group">
                             <label>&nbsp;</label>
-                            <a href="laporan.php" class="btn-action-custom" style="background: #e2e8f0; color: #334155 !important;">
+                            <a href="laporan_arsip.php" class="btn-action-custom" style="background: #e2e8f0; color: #334155 !important;">
                                 <i class='bx bx-refresh' style="font-size: 18px;"></i> Reset Filter
                             </a>
                         </div>

@@ -1,6 +1,8 @@
 <?php
 session_start();
-// Pastikan hanya Admin yang bisa akses halaman ini
+
+date_default_timezone_set('Asia/Jakarta');
+
 if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
   header("Location: ../../index.php");
   exit;
@@ -8,22 +10,56 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
 
 include "../../config/koneksi.php";
 
-// Ensure $koneksi is defined and the connection is successful
 if (!isset($koneksi) || !$koneksi) {
-    die("Database connection failed.");
+  die("Database connection failed.");
 }
 
-// 5 aktivitas terbaru - Sekarang mengambil Nama Unit juga
-$query_activity = "SELECT a.*, u.nama_unit FROM arsip a 
+// relasi Unit dan Kategori
+$query_activity = "SELECT a.*, u.nama_unit, k.nama_kategori FROM arsip a 
                    LEFT JOIN unit_kerja u ON a.id_unit = u.id_unit 
-                   ORDER BY a.id_arsip DESC LIMIT 5";
+                   LEFT JOIN kategori k ON a.id_kategori = k.id_kategori
+                   ORDER BY a.id_arsip DESC LIMIT 15";
 $recent_activity = mysqli_query($koneksi, $query_activity);
 
-// Hitung statistik untuk Box Info (Menambahkan Unit Kerja)
+// statistik untuk Box Info
 $count_arsip = mysqli_num_rows(mysqli_query($koneksi, "SELECT id_arsip FROM arsip"));
 $count_user = mysqli_num_rows(mysqli_query($koneksi, "SELECT id_user FROM users"));
 $count_unit = mysqli_num_rows(mysqli_query($koneksi, "SELECT id_unit FROM unit_kerja"));
-$count_kategori = mysqli_num_rows(mysqli_query($koneksi, "SELECT id_kategori FROM kategori"));
+
+// DATA GRAPH GLOBAL
+$query_all_unit = "SELECT u.nama_unit, COUNT(a.id_arsip) as total_arsip 
+                   FROM unit_kerja u 
+                   LEFT JOIN arsip a ON u.id_unit = a.id_unit 
+                   GROUP BY u.id_unit 
+                   ORDER BY total_arsip DESC";
+$result_all_unit = mysqli_query($koneksi, $query_all_unit);
+
+$unit_graph_indexes = [];
+$unit_percentages = [];
+$unit_totals = [];
+$unit_names_real = [];
+$unit_legend_data = [];
+
+$color_palette = ['#3C91E6', '#4ECE3D', '#FFB534', '#FF6B6B', '#9b59b6', '#ff9f40', '#e84393', '#00cec9', '#6c5ce7', '#fdcb6e'];
+
+$nomor_indeks = 1;
+while ($row_unit = mysqli_fetch_assoc($result_all_unit)) {
+  $unit_graph_indexes[] = $nomor_indeks;
+  $jumlah = (int)$row_unit['total_arsip'];
+  $unit_totals[] = $jumlah;
+  $unit_names_real[] = $row_unit['nama_unit'];
+  $persen = ($count_arsip > 0) ? round(($jumlah / $count_arsip) * 100, 1) : 0;
+  $unit_percentages[] = $persen;
+  $assigned_color = $color_palette[($nomor_indeks - 1) % count($color_palette)];
+
+  $unit_legend_data[] = [
+    'indeks' => $nomor_indeks,
+    'nama' => $row_unit['nama_unit'],
+    'warna' => $assigned_color,
+    'persen' => $persen
+  ];
+  $nomor_indeks++;
+}
 
 $page = 'dashboard';
 ?>
@@ -38,93 +74,177 @@ $page = 'dashboard';
   <link rel="stylesheet" href="../../assets/css/style.css">
   <title>Dashboard - SIAPuskesmas</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
   <style>
-    .info-data {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr 1fr;
-      gap: 24px;
-      margin-top: 20px;
-      align-items: flex-start;
+    html,
+    body {
+      height: 100vh;
+      overflow: hidden !important;
     }
 
+    #content main {
+      height: calc(100vh - 56px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .head-title,
+    .box-info {
+      flex-shrink: 0;
+      margin-bottom: 15px !important;
+    }
+
+    .head-title,
+    h3 {
+      color: var(--dark);
+    }
+
+    .info-data {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      /* Sedikit dilebarkan porsi kiri untuk tabel */
+      gap: 24px;
+      flex-grow: 1;
+      min-height: 0;
+      align-items: stretch;
+    }
+
+    /* 🎨 STYLE TABEL MODERN */
     .table-data {
-      margin-top: 0;
       background: var(--white-card);
       padding: 25px;
       border-radius: 20px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-
-    /* Kartu Shortcut */
-    .quick-access {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-    }
-
-    .access-card {
-      background: var(--white-card);
-      padding: 25px;
-      border-radius: 12px;
-      text-align: center;
-      transition: 0.3s;
-      border: 1px solid var(--border-color);
-    }
-
-    .access-card:hover {
-      transform: translateY(-5px);
-      background: var(--green);
-      color: #fff;
-    }
-
-    .access-card i {
-      font-size: 30px;
-      margin-bottom: 10px;
-    }
-
-    .text h3 {
-      font-size: 24px;
-      color: var(--dark);
-    }
-
-    .text p {
-      font-size: 14px;
-      color: var(--dark);
-    }
-
-    .breadcrumb {
       display: flex;
-      align-items: center;
-      grid-gap: 12px;
-      padding: 0;
-      margin: 0;
+      flex-direction: column;
+      min-height: 0;
     }
 
-    .breadcrumb li {
-      color: var(--dark);
-      font-size: 14px;
+    .activity-scroll-area {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding-right: 5px;
     }
 
-    .breadcrumb li a {
+    .modern-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .modern-table th {
+      position: sticky;
+      top: 0;
+      background: var(--white-card);
+      z-index: 10;
+      text-align: left;
+      padding: 12px 15px;
+      font-size: 13px;
       color: var(--dark-grey);
-      transition: all 0.3s ease;
-      font-weight: 500;
+      border-bottom: 2px solid var(--border-color);
     }
 
-    .breadcrumb li a.active {
-      color: var(--green);
-      pointer-events: none;
+    .modern-table td {
+      padding: 14px 15px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--dark);
+    }
+
+    .modern-table tr:hover td {
+      background: var(--light-bg);
+    }
+
+    .badge-cat {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
       font-weight: 600;
     }
 
-    .breadcrumb li a:hover {
-      color: var(--green);
+    /* 💡 CEGAH GRAFIK PENYEK */
+    .right-dashboard-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
 
-    .breadcrumb li i {
+    .chart-card {
+      background: var(--light);
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-color, transparent);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .chart-container-wrapper {
+      flex-grow: 1;
+      /* Biar grafik ambil sisa ruang paling banyak */
+      min-height: 200px;
+      position: relative;
+    }
+
+    .chart-caption-box {
+      margin-top: 15px;
+      padding: 12px;
+      background: var(--light);
+      border-top: 3px solid #4cbb17;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      max-height: 90px;
+      /* Batasi tinggi legenda biar grafik gak penyek */
+      overflow-y: auto;
+    }
+
+    .legend-item {
+      font-size: 12px;
       color: var(--dark-grey);
-      font-size: 16px;
-      vertical-align: middle;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-right: 5px;
+    }
+
+    .color-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .activity-scroll-area::-webkit-scrollbar,
+    .legend-grid::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .activity-scroll-area::-webkit-scrollbar-thumb,
+    .legend-grid::-webkit-scrollbar-thumb {
+      background: var(--dark-grey);
+      border-radius: 5px;
+    }
+
+    .h3 {
+      color: var(--dark);
+    }
+
+    .h3,
+    p {
+      color: var(--dark);
     }
   </style>
 </head>
@@ -139,16 +259,15 @@ $page = 'dashboard';
       <div class="head-title">
         <div class="left">
           <h1>Dashboard Admin</h1>
-          <p style="color: var(--dark-grey); font-size: 16px; margin-top: 4px;">
+          <p style="color: var(--dark-grey); font-size: 14px; margin-top: 2px;">
             Selamat datang Administrator, <span style="color: var(--green); font-weight: 600;">
-              <?= isset($_SESSION['nama']) ? $_SESSION['nama'] : 'Admin'; ?>
+              <?= isset($_SESSION['nama']) ? $_SESSION['nama'] : 'Administrator'; ?>
             </span>! 👋
-          </p>
           </p>
         </div>
         <div class="right" style="text-align: right;">
-          <h4 id="clock" style="color: var(--dark); margin: 0;"></h4>
-          <p style="color: var(--dark-grey); font-size: 12px;"><?= date('l, d F Y') ?></p>
+          <h4 id="clock" style="color: var(--dark); margin: 0; font-size: 16px;"></h4>
+          <p style="color: var(--dark-grey); font-size: 11px; margin-top: 1px;"><?= date('l, d F Y') ?></p>
         </div>
       </div>
 
@@ -168,60 +287,181 @@ $page = 'dashboard';
           </span>
         </li>
         <li>
-
           <i class='bx bxs-city'></i>
           <span class="text">
             <h3><?= $count_unit; ?></h3>
             <p>Unit Kerja</p>
           </span>
+        </li>
       </ul>
 
       <div class="info-data">
-
         <div class="table-data">
-          <div class="head" style="margin-bottom: 15px;">
-            <h3 style="font-size: 18px; color: var(--dark);">Aktivitas Global Unit</h3>
+          <div class="head" style="margin-bottom: 15px; flex-shrink: 0; display: flex; justify-content: space-between;">
+            <h3 style="font-size: 16px; color: var(--dark); font-weight: 600;">Log Aktivitas Unggahan</h3>
+            <small style="color: var(--dark-grey); font-size: 11px;">Aktivitas Terkini</small>
           </div>
-          <ul class="activity-list" style="list-style: none; padding: 0;">
-            <?php while ($act = mysqli_fetch_assoc($recent_activity)): ?>
-              <li style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
-                <div style="width: 35px; height: 35px; background: var(--light-green); color: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  <i class='bx bx-upload' style="font-size: 18px;"></i>
-                </div>
-                <div style="overflow: hidden; width: 100%;">
-                  <p style="font-size: 13px; margin: 0; color: var(--dark); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
-                    <strong><?= htmlspecialchars($act['nama_unit'] ?? 'Admin'); ?>:</strong> <?= htmlspecialchars($act['nama_arsip']) ?>
-                  </p>
-                  <small style="color: var(--dark-grey); font-size: 11px;">
-                    <i class='bx bx-time'></i> <?= date('l, d F Y', strtotime($act['created_at'])) ?>
-                  </small>
-                </div>
-              </li>
-            <?php endwhile; ?>
-          </ul>
+
+          <div class="activity-scroll-area">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>Nama Unit</th>
+                  <th>Nama Dokumen</th>
+                  <th>Waktu</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if (mysqli_num_rows($recent_activity) > 0): ?>
+                  <?php while ($act = mysqli_fetch_assoc($recent_activity)): ?>
+                    <tr>
+                      <td style="font-weight: 600;"><?= htmlspecialchars($act['nama_unit'] ?? 'Admin'); ?></td>
+                      <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <?= htmlspecialchars($act['nama_arsip']); ?>
+                      </td>
+                      <td style="color: var(--dark); font-size: 11px;"><?= date('H:i - d M', strtotime($act['created_at'])); ?></td>
+                    </tr>
+                  <?php endwhile; ?>
+                <?php else: ?>
+                  <tr>
+                    <td colspan="4" style="text-align: center; color: var(--dark-grey);">Belum ada aktivitas.</td>
+                  </tr>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div class="quick-access">
-          <a href="data_user.php" class="access-card">
-            <i class='bx bx-user-plus' style="color: var(--green);"></i>
-            <p>Tambah User</p>
-          </a>
-          <a href="data_unit.php" class="access-card">
-            <i class='bx bx-buildings' style="color: var(--orange);"></i>
-            <p>Unit Kerja</p>
-          </a>
-          <a href="laporan_arsip.php" class="access-card">
-            <i class='bx bxs-printer' style="color: #3C91E6;"></i>
-            <p>Cetak Laporan</p>
-          </a>
-          <a href="riwayat_unduhan.php" class="access-card">
-            <i class='bx bx-history' style="color: var(--red);"></i>
-            <p>Log Unduhan</p>
-          </a>
+        <div class="right-dashboard-panel">
+          <div class="chart-card">
+            <div class="head" style="margin-bottom: 15px; flex-shrink: 0;">
+              <h3 style="font-size: 16px; color: var(--dark); font-weight: 600;">Persentase Distribusi Arsip Per Unit Kerja</h3>
+            </div>
+
+            <div class="chart-container-wrapper">
+              <canvas id="cleanLineChart"></canvas>
+            </div>
+
+            <div class="chart-caption-box">
+              <div class="legend-grid">
+              <div class="head" style="flex-shrink: 0;">
+              <h3 style="font-size: 13px; color: var(--dark); font-weight: 600;"><i class='bx bx-paint' style="padding-right:5px; color: #4cbb17; vertical-align: middle; font-size: 16px;"></i>Indikator dan Kontribusi Unit Kerja</h3>
+            </div>
+                <?php foreach ($unit_legend_data as $legend): ?>
+                  <div class="legend-item">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span class="color-dot" style="background-color: <?= $legend['warna']; ?>;"></span>
+                      <span><?= htmlspecialchars($legend['nama']); ?></span>
+                    </div>
+                    <span style="font-weight: 700; color: #4cbb17;"><?= $legend['persen']; ?>%</span>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </main>
   </section>
+
+  <script>
+    const ctxLine = document.getElementById('cleanLineChart').getContext('2d');
+    const realUnitNames = <?= json_encode($unit_names_real); ?>;
+    const realUnitTotals = <?= json_encode($unit_totals); ?>;
+    const gradientBg = ctxLine.createLinearGradient(0, 0, 0, 180);
+    gradientBg.addColorStop(0, 'rgba(55, 211, 58, 0.43)');
+    gradientBg.addColorStop(1, 'rgba(55, 211, 58, 0.14)');
+
+    new Chart(ctxLine, {
+      type: 'line',
+      plugins: [ChartDataLabels],
+      data: {
+        labels: <?= json_encode($unit_graph_indexes); ?>,
+        datasets: [{
+          data: <?= json_encode($unit_percentages); ?>,
+          borderColor: '#4cbb17',
+          backgroundColor: gradientBg,
+          fill: true,
+          tension: 0.4,
+          borderWidth: 3,
+          pointBackgroundColor: <?= json_encode(array_column($unit_legend_data, 'warna')); ?>,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            left: 15,
+            right: 15,
+            top: 15,
+            bottom: 5
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          datalabels: {
+            anchor: 'end',
+            align: 'top',
+            color: '#4cbb17',
+            font: {
+              weight: '700',
+              size: 10
+            },
+            formatter: function(value) {
+              return value + '%';
+            }
+          },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              title: function(context) {
+                return realUnitNames[context[0].dataIndex];
+              },
+              label: function(context) {
+                return [
+                  ' Jumlah: ' + realUnitTotals[context.dataIndex] + ' berkas',
+                  ' Rasio: ' + context.raw + '%'
+                ];
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              display: false
+            },
+            grid: {
+              display: false
+            },
+            border: {
+              display: false
+            }
+          },
+          y: {
+            grace: '20%',
+            ticks: {
+              display: false
+            },
+            grid: {
+              display: false
+            },
+            border: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+  </script>
+
   <script src="../../assets/js/script.js"></script>
 </body>
 

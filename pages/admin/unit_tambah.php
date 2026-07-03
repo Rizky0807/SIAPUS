@@ -15,16 +15,26 @@ if (!isset($koneksi)) {
 
 // Proses Simpan Data
 if (isset($_POST['simpan'])) {
-    $nama_unit = mysqli_real_escape_string($koneksi, $_POST['nama_unit']);
+    // 💡 AMBIL DATA DARI INPUTAN BARU
+    $kode_unit = mysqli_real_escape_string($koneksi, trim($_POST['kode_unit']));
+    $nama_unit = mysqli_real_escape_string($koneksi, trim($_POST['nama_unit']));
+    $penanggung_jawab = mysqli_real_escape_string($koneksi, trim($_POST['penanggung_jawab']));
     
     // Validasi agar tidak ada nama unit ganda
     $cek = mysqli_query($koneksi, "SELECT * FROM unit_kerja WHERE nama_unit = '$nama_unit'");
+    // Validasi agar tidak ada kode unit ganda
+    $cek_kode = mysqli_query($koneksi, "SELECT * FROM unit_kerja WHERE kode_unit = '$kode_unit'");
+
     if (mysqli_num_rows($cek) > 0) {
         echo "<script>alert('Nama unit tersebut sudah ada!');</script>";
+    } elseif (mysqli_num_rows($cek_kode) > 0) {
+        echo "<script>alert('Kode unit tersebut sudah ada!');</script>";
     } else {
-        $insert = mysqli_query($koneksi, "INSERT INTO unit_kerja (nama_unit) VALUES ('$nama_unit')");
+        // 💡 INSERT TIGA KOLOM SEKALIGUS KE TABEL unit_kerja
+        $insert = mysqli_query($koneksi, "INSERT INTO unit_kerja (kode_unit, nama_unit, penanggung_jawab) VALUES ('$kode_unit', '$nama_unit', '$penanggung_jawab')");
         if ($insert) {
             echo "<script>alert('Unit kerja berhasil ditambahkan!'); window.location='data_unit.php';</script>";
+            exit;
         }
     }
 }
@@ -71,7 +81,6 @@ $page = 'data_unit.php';
     color: var(--dark-grey);
 }
 </style>
-</style>
 <body>
     <?php include '../partials/sidebar.php'; ?>
 
@@ -97,16 +106,26 @@ $page = 'data_unit.php';
                 </div>
 
                 <form action="" method="POST">
-                    <div class="form-group">
-                        <label>Nama Unit Kerja</label>
-                        <input type="text" name="nama_unit" placeholder="Contoh: Pelayana Raawat Inap" required autocomplete="off">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px;">Kode Unit</label>
+                        <input type="text" name="kode_unit" placeholder="Contoh: UK-KIA233" required autocomplete="off" style="width: 100%; padding: 8px; box-sizing: border-box;">
                     </div>
 
-                    <div class="form-action">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px;">Nama Unit Kerja</label>
+                        <input type="text" name="nama_unit" placeholder="Contoh: Pelayanan Rawat Inap" required autocomplete="off" style="width: 100%; padding: 8px; box-sizing: border-box;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px;">Penanggung Jawab (Kepala Unit)</label>
+                        <input type="text" name="penanggung_jawab" placeholder="Contoh: dr. Ahmad Fauzi" required autocomplete="off" style="width: 100%; padding: 8px; box-sizing: border-box;">
+                    </div>
+
+                    <div class="form-action" style="margin-top: 20px;">
                         <button type="submit" name="simpan" class="btn-save">
                             <i class='bx bxs-save'></i> Simpan Unit
                         </button>
-                        <a href="data_unit.php" class="btn-cancel">
+                        <a href="data_unit.php" class="btn-cancel" style="text-decoration: none; margin-left: 10px;">
                             <i class='bx bx-arrow-back'></i> Batal
                         </a>
                     </div>

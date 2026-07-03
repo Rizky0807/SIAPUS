@@ -139,11 +139,11 @@ $page = 'data_user.php';
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div class="form-group">
                             <label>Username</label>
-                            <input type="text" name="username" placeholder="Untuk keperluan login" required>
+                            <input type="text" name="username" placeholder="Username" required>
                         </div>
                         <div class="form-group">
                             <label>Password</label>
-                            <input type="password" name="password" placeholder="Minimal 6 karakter" required>
+                            <input type="password" name="password" placeholder="Password" required>
                         </div>
                     </div>
 
