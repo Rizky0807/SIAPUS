@@ -71,7 +71,6 @@ if (isset($_POST['update'])) {
                 username = '$username', 
                 role = '$role', 
                 id_unit = $id_unit, 
-                nama_unit = $nama_unit, 
                 status = '$status', 
                 foto = '$foto_name' 
                 $sql_pass 

@@ -18,7 +18,7 @@ if (isset($_POST['simpan'])) {
     $nama_arsip = mysqli_real_escape_string($koneksi, $_POST['nama_arsip']);
     $id_kategori = $_POST['id_kategori'];
     $deskripsi = mysqli_real_escape_string($koneksi, $_POST['deskripsi']);
-    
+
     // Penentuan ID Unit berdasarkan role
     $id_unit = ($_SESSION['role'] == 'admin') ? $_POST['id_unit'] : $_SESSION['id_unit'];
 
@@ -26,22 +26,24 @@ if (isset($_POST['simpan'])) {
     $file_name = $_FILES['file_arsip']['name'];
     $tmp_name = $_FILES['file_arsip']['tmp_name'];
     $extension = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-    
+
     // Filter ekstensi yang diizinkan
     $allowed_ext = ['pdf', 'docx', 'doc', 'jpg', 'jpeg', 'png'];
-    
+
     if (!in_array($extension, $allowed_ext)) {
         echo "<script>alert('Format file tidak didukung! Gunakan PDF, DOCX, atau Gambar.');</script>";
     } else {
         // Nama file unik agar tidak bentrok
         $new_file_name = time() . "_" . str_replace(' ', '_', $nama_arsip) . "." . $extension;
         $target = "../../assets/uploads/arsip/" . $new_file_name;
-        
+
         if (move_uploaded_file($tmp_name, $target)) {
             // Insert ke database sesuai struktur db_siapus
             $insert = mysqli_query($koneksi, "INSERT INTO arsip (kode_arsip, nama_arsip, id_kategori, id_unit, file_arsip, deskripsi, created_at) 
                       VALUES ('$kode_arsip', '$nama_arsip', '$id_kategori', '$id_unit', '$new_file_name', '$deskripsi', NOW())");
-            
+
+            // Asumsi $nama_arsip adalah variabel yang menangkap input judul arsip dari form
+            catat_log($koneksi, $_SESSION['id_user'], 'Upload Arsip', $nama_arsip);
             if ($insert) {
                 echo "<script>alert('Arsip berhasil diunggah!'); window.location='data_arsip.php';</script>";
             } else {
@@ -54,6 +56,7 @@ if (isset($_POST['simpan'])) {
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../../assets/css/style.css">
@@ -62,8 +65,8 @@ if (isset($_POST['simpan'])) {
 </head>
 
 <style>
-        /* Styling Breadcrumb agar Sejajar */
-        .breadcrumb {
+    /* Styling Breadcrumb agar Sejajar */
+    .breadcrumb {
         display: flex;
         align-items: center;
         grid-gap: 10px;
@@ -95,6 +98,7 @@ if (isset($_POST['simpan'])) {
         color: var(--dark-grey);
     }
 </style>
+
 <body>
     <?php include '../partials/sidebar.php'; ?>
     <section id="content">
@@ -125,21 +129,21 @@ if (isset($_POST['simpan'])) {
                         <label>Kategori</label>
                         <select name="id_kategori" required>
                             <option value="">-- Pilih Kategori --</option>
-                            <?php while($k = mysqli_fetch_assoc($kategori)) : ?>
+                            <?php while ($k = mysqli_fetch_assoc($kategori)) : ?>
                                 <option value="<?= $k['id_kategori']; ?>"><?= $k['nama_kategori']; ?></option>
                             <?php endwhile; ?>
                         </select>
                     </div>
                     <?php if ($_SESSION['role'] == 'admin') : ?>
-                    <div class="form-group">
-                        <label>Unit Kerja Terkait</label>
-                        <select name="id_unit" required>
-                            <option value="">-- Pilih Unit Kerja -- </option>
-                            <?php while($u = mysqli_fetch_assoc($units)) : ?>
-                                <option value="<?= $u['id_unit']; ?>"><?= $u['nama_unit']; ?></option>
-                            <?php endwhile; ?>
-                        </select>
-                    </div>
+                        <div class="form-group">
+                            <label>Unit Kerja Terkait</label>
+                            <select name="id_unit" required>
+                                <option value="">-- Pilih Unit Kerja -- </option>
+                                <?php while ($u = mysqli_fetch_assoc($units)) : ?>
+                                    <option value="<?= $u['id_unit']; ?>"><?= $u['nama_unit']; ?></option>
+                                <?php endwhile; ?>
+                            </select>
+                        </div>
                     <?php endif; ?>
                     <div class="form-group">
                         <label>File Arsip (PDF, DOCX, JPG, PNG)</label>
@@ -158,4 +162,5 @@ if (isset($_POST['simpan'])) {
         </main>
     </section>
 </body>
+
 </html>

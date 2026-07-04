@@ -17,26 +17,28 @@ if (!isset($koneksi)) {
 $role = $_SESSION['role'];
 $nama_admin = $_SESSION['nama'] ?? 'Administrator';
 
-// INI FITUR FILTERNYA: Inisialisasi Filter Rentang Waktu
+// Inisialisasi Filter Rentang Waktu
 $tgl_awal = $_GET['tgl_awal'] ?? '';
 $tgl_akhir = $_GET['tgl_akhir'] ?? '';
 
-// Query Dasar Join Log
-$query_base = "SELECT l.*, a.nama_arsip, a.kode_arsip 
-               FROM log_download l 
-               JOIN arsip a ON l.id_arsip = a.id_arsip WHERE 1=1";
+// Query Dasar Join Log Aktivitas ke Users dan Unit Kerja
+$query_base = "SELECT l.*, u.nama_lengkap, u.role, uk.nama_unit 
+               FROM log_aktivitas l 
+               JOIN users u ON l.id_user = u.id_user 
+               LEFT JOIN unit_kerja uk ON u.id_unit = uk.id_unit 
+               WHERE 1=1";
 
 // Masukkan filter tanggal ke dalam query log jika dipilih
 if ($tgl_awal != '' && $tgl_akhir != '') {
-    $query_base .= " AND DATE(l.waktu_download) BETWEEN '$tgl_awal' AND '$tgl_akhir'";
+    $query_base .= " AND DATE(l.waktu) BETWEEN '$tgl_awal' AND '$tgl_akhir'";
 }
 
-$query_log = mysqli_query($koneksi, $query_base . " ORDER BY l.waktu_download DESC");
+$query_log = mysqli_query($koneksi, $query_base . " ORDER BY l.waktu DESC");
 
 // Logika Hapus Riwayat (admin only)
 if (isset($_GET['hapus_semua']) && $_SESSION['role'] == 'admin') {
-    mysqli_query($koneksi, "DELETE FROM log_download");
-    echo "<script>alert('Semua riwayat berhasil dibersihkan!'); window.location='riwayat_unduhan.php';</script>";
+    mysqli_query($koneksi, "DELETE FROM log_aktivitas");
+    echo "<script>alert('Semua log aktivitas berhasil dibersihkan!'); window.location='riwayat_unduhan.php';</script>";
 }
 
 $page = 'riwayat.php';
@@ -48,46 +50,39 @@ $page = 'riwayat.php';
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../../assets/boxicons-2.1.4/css/boxicons.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
-    <title>Riwayat Unduhan - SIAPSIJUNJUNG</title>
+    <title>Log Aktivitas - SIAPSIJUNJUNG</title>
 </head>
 <style>
-
     .breadcrumb {
         display: flex;
         align-items: center;
         grid-gap: 10px;
         margin-top: 10px;
     }
-
     .breadcrumb li {
         color: var(--dark);
         list-style: none;
         display: flex;
         align-items: center;
     }
-
     .breadcrumb li a {
         color: var(--dark-grey);
         font-size: 14px;
         text-decoration: none;
     }
-
     .breadcrumb li a.active {
         color: var(--blue);
         font-weight: 600;
     }
-
     .breadcrumb li i {
         font-size: 18px;
         color: var(--dark-grey);
     }
-
     .action-box {
         display: flex;
         gap: 12px;
         align-items: center;
     }
-
     .btn-action-custom {
         height: 36px;
         padding: 0 16px;
@@ -104,12 +99,10 @@ $page = 'riwayat.php';
         cursor: pointer;
         transition: all 0.3s ease;
     }
-
     .btn-action-custom:hover {
         opacity: 0.9;
         transform: translateY(-1px);
     }
-
     .head h3 {
         font-size: 14px;
         font-weight: 700;
@@ -118,8 +111,6 @@ $page = 'riwayat.php';
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
-
-    /* Styling Filter Form Agar Rapi Sejajar Bawaan Template */
     .filter-card-custom {
         background: var(--white-card, #fff);
         padding: 15px 20px;
@@ -127,19 +118,16 @@ $page = 'riwayat.php';
         margin-bottom: 20px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
-
     .form-group-custom {
         display: flex;
         flex-direction: column;
         gap: 5px;
     }
-
     .form-group-custom label {
         font-size: 12px;
         font-weight: 600;
         color: var(--dark-grey);
     }
-
     .form-group-custom input {
         padding: 8px 12px;
         border-radius: 8px;
@@ -150,90 +138,37 @@ $page = 'riwayat.php';
         height: 35px;
         box-sizing: border-box;
     }
-
     .print-only {
         display: none !important;
     }
 
     /* CETAK/PRINT PREVIEW */
     @media print {
-        #sidebar, 
-        nav, 
-        #navbar,
-        header,
-        .breadcrumb,
-        .filter-card-custom,
-        .action-box { 
+        #sidebar, nav, #navbar, header, .breadcrumb, .filter-card-custom, .action-box { 
             display: none !important; 
         }
-
         #content, main, body {
-            width: 100% !important;
-            left: 0 !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            position: static !important;
-            overflow: visible !important;
-            height: auto !important;
+            width: 100% !important; left: 0 !important; padding: 0 !important; margin: 0 !important;
+            position: static !important; overflow: visible !important; height: auto !important;
         }
-
-        body {
-            background: #fff !important;
-            color: #000 !important;
-        }
-
-        .print-only {
-            display: block !important;
-        }
-
-        .head h3 {
-            color: #000 !important;
-            font-size: 12px !important;
-            margin-top: 15px;
-        }
-
+        body { background: #fff !important; color: #000 !important; }
+        .print-only { display: block !important; }
+        .head h3 { color: #000 !important; font-size: 12px !important; margin-top: 15px; }
         .table-data, .order {
-            box-shadow: none !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-            background: #fff !important;
-            overflow: visible !important;
-            height: auto !important;
-            border-radius: 0 !important;
+            box-shadow: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important;
+            background: #fff !important; overflow: visible !important; height: auto !important; border-radius: 0 !important;
         }
-
         table {
-            width: 100% !important;
-            border-collapse: collapse !important;
-            margin-top: 5px;
-            margin-bottom: 20px;
-            page-break-inside: auto !important;
-            border-radius: 0 !important;
+            width: 100% !important; border-collapse: collapse !important; margin-top: 5px; margin-bottom: 20px;
+            page-break-inside: auto !important; border-radius: 0 !important;
         }
-
-        tr {
-            page-break-inside: avoid !important;
-            page-break-after: auto !important;
-        }
-
+        tr { page-break-inside: avoid !important; page-break-after: auto !important; }
         th, td {
-            border: 1px solid #000 !important;
-            padding: 8px !important;
-            font-size: 12px !important;
-            color: #000 !important;
-            border-radius: 0 !important;
+            border: 1px solid #000 !important; padding: 8px !important; font-size: 12px !important;
+            color: #000 !important; border-radius: 0 !important;
         }
-
-        th {
-            background-color: #f2f2f2 !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-
-        .print-signature {
-            page-break-inside: avoid !important;
-        }
+        th { background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .print-signature { page-break-inside: avoid !important; }
     }
 </style>
 <body>
@@ -246,24 +181,24 @@ $page = 'riwayat.php';
             <!-- HEADER NAVIGASI -->
             <div class="head-title">
                 <div class="left">
-                    <h1>Riwayat Unduhan Arsip</h1>
+                    <h1>Log Aktivitas Sistem</h1>
                     <ul class="breadcrumb">
                         <li><a href="dashboard.php">Dashboard</a></li>
                         <li><i class='bx bx-chevron-right'></i></li>
-                        <li><a class="active" href="#">Riwayat Unduhan</a></li>
+                        <li><a class="active" href="#">Log Aktivitas</a></li>
                     </ul>
                 </div>
                 
                 <div class="action-box">
-                    <button onclick="window.print()" class="btn-action-custom btn-print" style="background: var(--green);  border-radius: 10px;">
+                    <button onclick="window.print()" class="btn-action-custom btn-print" style="background: var(--green); border-radius: 10px;">
                         <i class='bx bxs-printer' style="font-size: 14px;"></i>
                         <span class="text">Cetak Laporan Log</span>
                     </button>
 
                     <?php if ($_SESSION['role'] == 'admin') : ?>
-                    <a href="riwayat_unduhan.php?hapus_semua=true" class="btn-action-custom" style="background: #ff0000;  border-radius: 10px;" onclick="return confirm('Yakin ingin menghapus semua catatan riwayat?')">
+                    <a href="riwayat_unduhan.php?hapus_semua=true" class="btn-action-custom" style="background: #ff0000; border-radius: 10px;" onclick="return confirm('Yakin ingin menghapus semua catatan aktivitas?')">
                         <i class='bx bxs-trash' style="font-size: 14px;"></i>
-                        <span class="text">Bersihkan Riwayat</span>
+                        <span class="text">Bersihkan Log</span>
                     </a>
                     <?php endif; ?>
                 </div>
@@ -297,7 +232,7 @@ $page = 'riwayat.php';
                     <tr style="border: none !important;">
                         <td style="width: 18%; border: none !important; padding: 2px !important;"><strong>Jenis Dokumen</strong></td>
                         <td style="width: 2%; border: none !important; padding: 2px !important;">:</td>
-                        <td style="border: none !important; padding: 2px !important;">Laporan Log Aktivitas Unduhan Arsip Digital (Admin)</td>
+                        <td style="border: none !important; padding: 2px !important;">Laporan Log Aktivitas Sistem</td>
                         <td style="width: 15%; border: none !important; padding: 2px !important;"><strong>Dicetak Oleh</strong></td>
                         <td style="width: 2%; border: none !important; padding: 2px !important;">:</td>
                         <td style="border: none !important; padding: 2px !important;"><?= htmlspecialchars($nama_admin); ?> (<?= ucfirst($role); ?>)</td>
@@ -316,7 +251,7 @@ $page = 'riwayat.php';
                 <hr style="border: 1px solid #000; margin-top: 15px;">
             </div>
 
-            <!-- 💡 FITUR FILTER BARU DENGAN ALIGN-ITEMS FLEX-END -->
+            <!-- FITUR FILTER -->
             <div class="filter-card-custom">
                 <form action="" method="GET" style="display: flex; gap: 15px; flex-wrap: wrap; width: 100%; align-items: flex-end;">
                     <div class="form-group-custom">
@@ -338,16 +273,18 @@ $page = 'riwayat.php';
             <div class="table-data">
                 <div class="order">
                     <div class="head">
-                        <h3 style="color: var(--dark)">Log Aktivitas Riwayat Unduhan Arsip Digital</h3>
+                        <h3 style="color: var(--dark)">Data Log Aktivitas Keseluruhan</h3>
                     </div>
                     <table>
                         <thead>
                             <tr>
-                                <th width="60" style="text-align: center;">No</th>
-                                <th>Nama Pengunduh</th>
-                                <th>Kode Arsip</th>
-                                <th>Nama Arsip</th>
-                                <th width="220">Waktu Akses</th>
+                                <th width="50" style="text-align: center;">No</th>
+                                <th width="160">Waktu</th>
+                                <th>Nama Pengguna</th>
+                                <th>Role</th>
+                                <th>Unit Kerja</th>
+                                <th>Aktivitas</th>
+                                <th>Objek Aktivitas</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -359,31 +296,35 @@ $page = 'riwayat.php';
                             <tr>
                                 <td style="text-align: center;"><?= $no++; ?></td>
                                 <td>
-                                    <p style="font-weight: 600; color: var(--dark);"><?= htmlspecialchars($row['user_pengunduh']); ?></p>
-                                </td>
-                                <td><span style="font-family: monospace; font-weight: bold;"><?= $row['kode_arsip']; ?></span></td>
-                                <td><?= htmlspecialchars($row['nama_arsip']); ?></td>
-                                <td>
                                     <span style="color: var(--dark-grey); font-size: 13px; font-weight: 500;">
-                                        <i class='bx bx-time-five' style="vertical-align: middle;"></i> <?= date('d/m/Y | H:i', strtotime($row['waktu_download'])); ?> WIB
+                                        <i class='bx bx-time-five' style="vertical-align: middle;"></i> <?= date('d/m/Y | H:i', strtotime($row['waktu'])); ?> WIB
                                     </span>
                                 </td>
+                                <td>
+                                    <p style="font-weight: 600; color: var(--dark); margin:0;"><?= htmlspecialchars($row['nama_lengkap']); ?></p>
+                                </td>
+                                <td><?= ucfirst($row['role']); ?></td>
+                                <td><?= htmlspecialchars($row['nama_unit'] ?? '-'); ?></td>
+                                <td>
+                                    <span style="font-weight: bold; color: var(--blue);"><?= htmlspecialchars($row['aktivitas']); ?></span>
+                                </td>
+                                <td><?= htmlspecialchars($row['objek_aktivitas']); ?></td>
                             </tr>
                             <?php 
                                 endwhile; 
                             else :
                             ?>
                             <tr>
-                                <td colspan="5" style="text-align: center; padding: 30px; color: var(--dark-grey);">
-                                    Belum ada aktivitas unduhan yang tercatat pada periode ini.
+                                <td colspan="7" style="text-align: center; padding: 30px; color: var(--dark-grey);">
+                                    Belum ada aktivitas yang tercatat pada periode ini.
                                 </td>
                             </tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
 
-                    <!-- PANEL TANDA TANGAN (Hanya Muncul Saat Dicetak) -->
-                    <div class="print-only" style="margin-top: 60px; display: flex; justify-content: flex-end;">
+                    <!-- PANEL TANDA TANGAN -->
+                    <div class="print-only print-signature" style="margin-top: 60px; display: flex; justify-content: flex-end;">
                         <div style="text-align: center; width: 250px; font-size: 13px;">
                             <p>Sijunjung, <?= date('d F Y'); ?></p>
                             <p>Mengetahui,</p>

@@ -9,7 +9,7 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
 include "../../config/koneksi.php";
 /** @var mysqli $koneksi */
 
-// Ambil data unit kerja untuk dropdown
+// Ambil data unit kerja untuk 
 $units = mysqli_query($koneksi, "SELECT * FROM unit_kerja ORDER BY nama_unit ASC");
 
 // Proses Simpan Data
@@ -49,8 +49,8 @@ if (isset($_POST['simpan'])) {
     if (mysqli_num_rows($cek_user) > 0) {
         echo "<script>alert('Username sudah digunakan, cari yang lain!');</script>";
     } else {
-        $insert = mysqli_query($koneksi, "INSERT INTO users (username, password, nama_lengkap, id_unit, nama_unit, role, foto, status) 
-                  VALUES ('$username', '$password', '$nama', $id_unit, $nama_unit, '$role', '$foto_name', '$status')");
+        $insert = mysqli_query($koneksi, "INSERT INTO users (username, password, nama_lengkap, id_unit, role, foto, status) 
+                  VALUES ('$username', '$password', '$nama', $id_unit, '$role', '$foto_name', '$status')");
 
         if ($insert) {
             echo "<script>alert('Akun user berhasil dibuat!'); window.location='data_user.php';</script>";

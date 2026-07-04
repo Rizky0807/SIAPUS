@@ -76,7 +76,6 @@ if (switchMode) {
     });
 }
 
-// fix clock
 function updateClock() {
     const clockElement = document.getElementById('clock');
     if (clockElement) {

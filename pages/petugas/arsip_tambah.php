@@ -44,7 +44,8 @@ if (isset($_POST['simpan'])) {
             // Insert ke database sesuai struktur db_siapus
             $insert = mysqli_query($koneksi, "INSERT INTO arsip (kode_arsip, nama_arsip, id_kategori, id_unit, file_arsip, deskripsi, created_at) 
                                               VALUES ('$kode_arsip', '$nama_arsip', '$id_kategori', '$id_unit', '$new_file_name', '$deskripsi', NOW())");
-            
+            // Asumsi $nama_arsip adalah variabel yang menangkap input judul arsip dari form
+            catat_log($koneksi, $_SESSION['id_user'], 'Upload Arsip', $nama_arsip); 
             if ($insert) {
                 echo "<script>alert('Arsip berhasil diunggah!'); window.location='data_arsip.php';</script>";
             } else {

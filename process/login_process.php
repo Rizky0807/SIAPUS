@@ -36,6 +36,8 @@ if ($data && password_verify($password, $data['password'])) {
     // SEKARANG NAMA UNIT SUDAH TERSEDIA KARENA HASIL JOIN
     $_SESSION['nama_unit'] = $data['nama_unit'] ?? 'Tanpa Unit';
 
+    // Asumsi variabel id_user didapat dari kueri cek login, misalnya $data['id_user']
+    catat_log($koneksi, $data['id_user'], 'Login', 'Akses Masuk Sistem');   
     // Redirect otomatis berdasarkan role
     if ($data['role'] === 'admin') {
         header("Location: ../pages/admin/dashboard.php");

@@ -23,7 +23,7 @@ if ($data) {
 
     if (file_exists($file_path)) {
         // 1. Catat log unduhan
-        mysqli_query($koneksi, "INSERT INTO log_download (id_arsip, user_pengunduh) VALUES ('$id', '$user_pengunduh')");
+        mysqli_query($koneksi, "INSERT INTO log_aktivitas (id_arsip, user_pengunduh) VALUES ('$id', '$user_pengunduh')");
 
         // 2. Kirim file ke browser
         header('Content-Description: File Transfer');
