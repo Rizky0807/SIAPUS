@@ -15,8 +15,8 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] == 'pimpinan') {
 if (isset($_GET['id'])) {
     $id = mysqli_real_escape_string($koneksi, $_GET['id']);
 
-    // Ambil nama file arsip
-    $cek = mysqli_query($koneksi, "SELECT file_arsip FROM arsip WHERE id_arsip = '$id'");
+    // 1. Ambil nama file dan nama arsip (nama_arsip ditambah untuk objek log)
+    $cek = mysqli_query($koneksi, "SELECT nama_arsip, file_arsip FROM arsip WHERE id_arsip = '$id'");
     $data = mysqli_fetch_assoc($cek);
 
     if ($data) {
@@ -25,9 +25,19 @@ if (isset($_GET['id'])) {
             unlink($path);
         }
 
-        mysqli_query($koneksi, "DELETE FROM arsip WHERE id_arsip = '$id'");
+        // 2. Simpan nama arsip ke variabel sebelum kueri DELETE dijalankan
+        $nama_arsip_dihapus = $data['nama_arsip'];
+
+        $delete = mysqli_query($koneksi, "DELETE FROM arsip WHERE id_arsip = '$id'");
+        
+        if ($delete) {
+            // ✅ CCTV mencatat HANYA ketika database terbukti sukses menghapus data
+            catat_log($koneksi, $_SESSION['id_user'], 'Hapus Arsip', $nama_arsip_dihapus);
+        }
+
         echo "<script>alert('Arsip berhasil dihapus!'); window.location='data_arsip.php';</script>";
     }
 } else {
     header("Location: data_arsip.php");
 }
+?>

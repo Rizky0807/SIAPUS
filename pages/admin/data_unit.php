@@ -10,17 +10,6 @@ include "../../config/koneksi.php";
 if (!isset($koneksi)) {
     die("Koneksi ke database gagal. Periksa konfigurasi koneksi.");
 }
-
-// Proses Hapus Data
-if (isset($_GET['hapus'])) {
-    $id = mysqli_real_escape_string($koneksi, $_GET['hapus']);
-    $delete = mysqli_query($koneksi, "DELETE FROM unit_kerja WHERE id_unit = '$id'");
-    if ($delete) {
-        echo "<script>alert('Unit kerja berhasil dihapus!'); window.location='data_unit.php';</script>";
-        exit;
-    }
-}
-
 $page = 'data_unit.php';
 
 // 💡 QUERY SINKRON DB: Mengambil data kode_unit dan penanggung_jawab yang baru ditambahkan
@@ -274,7 +263,7 @@ $query_unit = mysqli_query($koneksi, $query_string);
                                         <a href="unit_edit.php?id=<?= $row['id_unit']; ?>" class="btn-action-edit">
                                             <i class='bx bxs-edit'></i><span>Edit</span>
                                         </a>
-                                        <a href="data_unit.php?hapus=<?= $row['id_unit']; ?>" class="btn-action-delete" onclick="return confirm('Menghapus unit akan menghapus otomatis seluruh data akun petugas & berkas di unit ini secara permanen. Yakin?')">
+                                        <a href="unit_hapus.php?hapus=<?= $row['id_unit']; ?>" class="btn-action-delete" onclick="return confirm('Menghapus unit akan menghapus otomatis seluruh data akun petugas & berkas di unit ini secara permanen. Yakin?')">
                                             <i class='bx bxs-trash'></i><span>Hapus</span>
                                         </a>
                                     </div>

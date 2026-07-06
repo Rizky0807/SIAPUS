@@ -36,13 +36,14 @@ if (isset($_POST['update'])) {
     $update = mysqli_query($koneksi, "UPDATE kategori SET nama_kategori = '$nama_kategori' WHERE id_kategori = '$id'");
     
     if ($update) {
+        catat_log($koneksi, $_SESSION['id_user'], 'Edit Kategori', $nama_kategori);
         echo "<script>alert('Kategori berhasil diperbarui!'); window.location='data_kategori.php';</script>";
     } else {
         echo "<script>alert('Gagal memperbarui data.');</script>";
     }
 }
 
-$page = 'kategori.php';
+$page = 'data_kategori.php';
 ?>
 
 <!DOCTYPE html>

@@ -26,22 +26,13 @@ if (isset($_POST['update'])) {
     $role = $_POST['role'];
     $status = $_POST['status'];
     
-    // 💡 PERBAIKAN LOGIKA: Inisialisasi default nilai unit baru
+    // Inisialisasi default nilai unit baru
     $id_unit = "NULL";
-    $nama_unit = "NULL";
 
-    // Jika yang diedit diubah/tetap menjadi petugas
+    // Bersih! Hapus pencarian sub-query tabel unit_kerja yang lama
     if ($role === 'petugas' && !empty($_POST['id_unit'])) {
         $id_unit_input = mysqli_real_escape_string($koneksi, $_POST['id_unit']);
         $id_unit = "'" . $id_unit_input . "'";
-
-        // Ambil nama unit terbaru dari tabel unit_kerja
-        $cari_nama_unit = mysqli_query($koneksi, "SELECT nama_unit FROM unit_kerja WHERE id_unit = '$id_unit_input'");
-        $data_unit = mysqli_fetch_assoc($cari_nama_unit);
-        
-        if ($data_unit) {
-            $nama_unit = "'" . mysqli_real_escape_string($koneksi, $data_unit['nama_unit']) . "'";
-        }
     }
     
     // Logika Password: Jika diisi maka ganti, jika kosong tetap password lama
@@ -65,7 +56,7 @@ if (isset($_POST['update'])) {
         }
     }
 
-    // 💡 SEKARANG UPDATE TERMASUK id_unit TANPA PETIK DAN nama_unit
+    // Kueri UPDATE bersih tanpa kolom nama_unit
     $update = mysqli_query($koneksi, "UPDATE users SET 
                 nama_lengkap = '$nama', 
                 username = '$username', 
@@ -77,6 +68,9 @@ if (isset($_POST['update'])) {
                 WHERE id_user = '$id'");
 
     if ($update) {
+        // ✅ SUNTIK CCTV LOG AKTIVITAS
+        catat_log($koneksi, $_SESSION['id_user'], 'Edit Pengguna', $username);
+
         echo "<script>alert('Data user berhasil diperbarui!'); window.location='data_user.php';</script>";
     } else {
         echo "Error: " . mysqli_error($koneksi);

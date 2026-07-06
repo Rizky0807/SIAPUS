@@ -9,9 +9,10 @@ if (!isset($_SESSION['login']) || $_SESSION['role'] !== 'admin') {
 include "../../config/koneksi.php";
 /** @var mysqli $koneksi */
 
-// Ambil data unit kerja untuk 
+// Ambil data unit kerja untuk dropdown
 $units = mysqli_query($koneksi, "SELECT * FROM unit_kerja ORDER BY nama_unit ASC");
 
+// Proses Simpan Data
 // Proses Simpan Data
 if (isset($_POST['simpan'])) {
     $nama = mysqli_real_escape_string($koneksi, $_POST['nama_lengkap']);
@@ -20,20 +21,13 @@ if (isset($_POST['simpan'])) {
     $role = $_POST['role'];
     $status = 'aktif';
 
-    // Inisialisasi default nilai unit
+    // 💡 1. Set default string "NULL" agar dibaca sebagai keyword NULL oleh SQL jika bukan petugas
     $id_unit = "NULL";
-    $nama_unit = "NULL";
 
-    if ($role === 'petugas' && !empty($_POST['id_unit'])) {
+    // 💡 2. Jika role petugas, isi dengan ID unit yang dipilih dan apit dengan kutip tunggal
+    if ($role === 'petugas' && isset($_POST['id_unit']) && $_POST['id_unit'] != '') {
         $id_unit_input = mysqli_real_escape_string($koneksi, $_POST['id_unit']);
         $id_unit = "'" . $id_unit_input . "'";
-
-        $cari_nama_unit = mysqli_query($koneksi, "SELECT nama_unit FROM unit_kerja WHERE id_unit = '$id_unit_input'");
-        $data_unit = mysqli_fetch_assoc($cari_nama_unit);
-        
-        if ($data_unit) {
-            $nama_unit = "'" . mysqli_real_escape_string($koneksi, $data_unit['nama_unit']) . "'";
-        }
     }
 
     // Proses Upload Foto Profil
@@ -49,11 +43,18 @@ if (isset($_POST['simpan'])) {
     if (mysqli_num_rows($cek_user) > 0) {
         echo "<script>alert('Username sudah digunakan, cari yang lain!');</script>";
     } else {
+        // 💡 3. Perhatikan posisi variabel $id_unit DI DALAM QUERY (TIDAK BOLEH diapit kutip lagi)
+        // Karena kalau role-nya admin, dia akan tertulis: ..., NULL, ... (Benar)
+        // Kalau role-nya petugas, dia akan tertulis: ..., 'ID_UNIT_DISINI', ... (Benar)
         $insert = mysqli_query($koneksi, "INSERT INTO users (username, password, nama_lengkap, id_unit, role, foto, status) 
-                  VALUES ('$username', '$password', '$nama', $id_unit, '$role', '$foto_name', '$status')");
+                                          VALUES ('$username', '$password', '$nama', $id_unit, '$role', '$foto_name', '$status')");
 
         if ($insert) {
+            // LOG AKTIVITAS
+            catat_log($koneksi, $_SESSION['id_user'], 'Tambah Pengguna', $username);
+
             echo "<script>alert('Akun user berhasil dibuat!'); window.location='data_user.php';</script>";
+            exit;
         } else {
             echo "Error: " . mysqli_error($koneksi);
         }

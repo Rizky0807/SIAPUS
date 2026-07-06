@@ -19,11 +19,11 @@ if (!isset($_GET['id'])) {
 }
 
 $id_arsip = mysqli_real_escape_string($koneksi, $_GET['id']);
-// Ambil nama pengunduh dari session nama_lengkap
-$user_pengunduh = $_SESSION['nama']; 
+// Ambil ID user dari session untuk pencatatan log baru
+$id_user = $_SESSION['id_user']; 
 
-// 1. Ambil data arsip dari database
-$query = mysqli_query($koneksi, "SELECT file_arsip FROM arsip WHERE id_arsip = '$id_arsip'");
+// 1. Ambil data nama_arsip dan file_arsip dari database (ditambah nama_arsip untuk log)
+$query = mysqli_query($koneksi, "SELECT nama_arsip, file_arsip FROM arsip WHERE id_arsip = '$id_arsip'");
 $data = mysqli_fetch_assoc($query);
 
 if ($data) {
@@ -31,10 +31,10 @@ if ($data) {
     $file_path = "../../assets/uploads/arsip/" . $data['file_arsip'];
 
     if (file_exists($file_path)) {
-        // 3. Simpan riwayat ke tabel log_download sesuai struktur database
-        // created_at akan terisi otomatis oleh CURRENT_TIMESTAMP
-        mysqli_query($koneksi, "INSERT INTO log_download (id_arsip, user_pengunduh) 
-                                VALUES ('$id_arsip', '$user_pengunduh')");
+        // 3. PANGGIL FUNGSI GLOBAL CCTV KITA
+        // Menggantikan kueri log_download yang lama
+        $nama_arsip = $data['nama_arsip'];
+        catat_log($koneksi, $id_user, 'Download Arsip', $nama_arsip);
 
         // 4. Proses Force Download agar mendukung berbagai format (PDF, DOCX, Gambar)
         header('Content-Description: File Transfer');

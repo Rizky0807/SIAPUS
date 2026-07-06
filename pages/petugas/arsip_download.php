@@ -6,10 +6,11 @@ include "../../config/koneksi.php";
 if (!isset($_SESSION['login'])) { exit; }
 
 $id = mysqli_real_escape_string($koneksi, $_GET['id']);
-// Gunakan nama lengkap dari session
-$user_pengunduh = $_SESSION['nama']; 
+// Ambil ID user dari session untuk pencatatan log baru
+$id_user = $_SESSION['id_user']; 
 
-$query = mysqli_query($koneksi, "SELECT file_arsip, id_unit FROM arsip WHERE id_arsip = '$id'");
+// 1. Ambil data nama_arsip, file_arsip, dan id_unit untuk proteksi
+$query = mysqli_query($koneksi, "SELECT nama_arsip, file_arsip, id_unit FROM arsip WHERE id_arsip = '$id'");
 $data = mysqli_fetch_assoc($query);
 
 if ($data) {
@@ -22,13 +23,17 @@ if ($data) {
     $file_path = "../../assets/uploads/arsip/" . $data['file_arsip'];
 
     if (file_exists($file_path)) {
-        // 1. Catat log unduhan
-        mysqli_query($koneksi, "INSERT INTO log_aktivitas (id_arsip, user_pengunduh) VALUES ('$id', '$user_pengunduh')");
+        // 2. PANGGIL FUNGSI GLOBAL CCTV LOG AKTIVITAS
+        $nama_arsip = $data['nama_arsip'];
+        catat_log($koneksi, $id_user, 'Download Arsip', $nama_arsip);
 
-        // 2. Kirim file ke browser
+        // 3. Kirim file ke browser (Force Download)
         header('Content-Description: File Transfer');
         header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename="'.basename($file_path).'"');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
         header('Content-Length: ' . filesize($file_path));
         
         ob_clean();

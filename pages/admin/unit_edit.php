@@ -40,6 +40,8 @@ if (isset($_POST['update'])) {
                                           WHERE id_unit = '$id'");
         
         if ($update) {
+
+            catat_log($koneksi, $_SESSION['id_user'], 'Edit Unit Kerja', $nama_unit);
             echo "<script>alert('Data unit berhasil diperbarui!'); window.location='data_unit.php';</script>";
             exit;
         } else {

@@ -15,6 +15,7 @@ if (isset($_POST['simpan'])) {
     $nama = mysqli_real_escape_string($koneksi, $_POST['nama_kategori']);
     $insert = mysqli_query($koneksi, "INSERT INTO kategori (nama_kategori) VALUES ('$nama')");
     if ($insert) {
+        catat_log($koneksi, $_SESSION['id_user'], 'Tambah Kategori', $nama);
         echo "<script>alert('Kategori berhasil ditambah!'); window.location='data_kategori.php';</script>";
     }
 }

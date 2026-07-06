@@ -33,6 +33,8 @@ if (isset($_POST['simpan'])) {
         // 💡 INSERT TIGA KOLOM SEKALIGUS KE TABEL unit_kerja
         $insert = mysqli_query($koneksi, "INSERT INTO unit_kerja (kode_unit, nama_unit, penanggung_jawab) VALUES ('$kode_unit', '$nama_unit', '$penanggung_jawab')");
         if ($insert) {
+
+            catat_log($koneksi, $_SESSION['id_user'], 'Tambah Unit Kerja', $nama_unit);
             echo "<script>alert('Unit kerja berhasil ditambahkan!'); window.location='data_unit.php';</script>";
             exit;
         }

@@ -65,12 +65,14 @@ if (isset($_POST['update'])) {
                 WHERE id_arsip = '$id'");
 
     if ($update) {
+        // ✅ CCTV mencatat HANYA ketika database terbukti sukses melakukan pembaruan
+        catat_log($koneksi, $_SESSION['id_user'], 'Edit Arsip', $nama);
+
         echo "<script>alert('Arsip berhasil diperbarui!'); window.location='data_arsip.php';</script>";
     }
 }
 $page = 'data_arsip.php';
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 

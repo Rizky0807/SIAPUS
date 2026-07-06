@@ -59,10 +59,10 @@ $role = $_SESSION['role']; // Ambil role dari session login
         </li>
 
         <?php if ($role == 'admin' || $role == 'pimpinan') : ?>
-            <li class="<?= ($page == 'riwayat_unduhan.php') ? 'active' : '' ?>">
-                <a href="riwayat_unduhan.php">
+            <li class="<?= ($page == 'log_aktivitas.php') ? 'active' : '' ?>">
+                <a href="log_aktivitas.php">
                     <i class='bx bx-history'></i>
-                    <span class="text">Riwayat Unduhan</span>
+                    <span class="text">Log Aktivitas</span>
                 </a>
             </li>
             <li class="<?= ($page == 'laporan_arsip.php') ? 'active' : '' ?>">

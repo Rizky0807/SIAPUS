@@ -14,7 +14,7 @@ $query_user = mysqli_query($koneksi, "SELECT users.*, unit_kerja.nama_unit
                                       FROM users 
                                       LEFT JOIN unit_kerja ON users.id_unit = unit_kerja.id_unit 
                                       ORDER BY users.role ASC");
-$page = 'user.php';
+$page = 'data_user.php';
 ?>
 
 <!DOCTYPE html>

@@ -18,19 +18,26 @@ if (isset($_GET['id'])) {
         exit;
     }
 
-    // Ambil data foto untuk dihapus dari folder
-    $cek = mysqli_query($koneksi, "SELECT foto FROM users WHERE id_user = '$id'");
+    // Ambil data profil (ditambahkan username untuk kebutuhan penamaan log)
+    $cek = mysqli_query($koneksi, "SELECT username, foto FROM users WHERE id_user = '$id'");
     $data = mysqli_fetch_assoc($cek);
 
-    // Hapus file foto jika bukan default
-    if ($data['foto'] != 'default.jpg' && file_exists("../../assets/img/profiles/" . $data['foto'])) {
-        unlink("../../assets/img/profiles/" . $data['foto']);
-    }
+    if ($data) {
+        // Simpan username target ke variabel penampung log sebelum baris data terhapus
+        $username_dihapus = $data['username'];
 
-    $delete = mysqli_query($koneksi, "DELETE FROM users WHERE id_user = '$id'");
-    
-    if ($delete) {
-        echo "<script>alert('User berhasil dihapus!'); window.location='data_user.php';</script>";
+        // Hapus file foto jika bukan default
+        if ($data['foto'] != 'default.jpg' && file_exists("../../assets/img/profiles/" . $data['foto'])) {
+            unlink("../../assets/img/profiles/" . $data['foto']);
+        }
+
+        $delete = mysqli_query($koneksi, "DELETE FROM users WHERE id_user = '$id'");
+        
+        if ($delete) {
+            catat_log($koneksi, $_SESSION['id_user'], 'Hapus Pengguna', $username_dihapus);
+            
+            echo "<script>alert('User berhasil dihapus!'); window.location='data_user.php';</script>";
+        }
     }
 } else {
     header("Location: data_user.php");

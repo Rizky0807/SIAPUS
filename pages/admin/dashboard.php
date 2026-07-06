@@ -61,7 +61,7 @@ while ($row_unit = mysqli_fetch_assoc($result_all_unit)) {
   $nomor_indeks++;
 }
 
-$page = 'dashboard';
+$page = 'dashboard.php';
 ?>
 
 <!DOCTYPE html>
