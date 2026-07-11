@@ -16,7 +16,7 @@ if (!$koneksi) {
 
 mysqli_set_charset($koneksi, "utf8mb4");
 
-/**
+/*
  * Mencatat aktivitas pengguna.
  */
 function catat_log($koneksi, $id_user, $aktivitas, $objek_aktivitas)

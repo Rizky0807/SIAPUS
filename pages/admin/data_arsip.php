@@ -39,10 +39,10 @@ if ($f_kat != '') {
     $query_base .= " AND a.id_kategori = '$f_kat'";
 }
 
-// Menggunakan kolom created_at sesuai database Anda
+
 $query_arsip = mysqli_query($koneksi, $query_base . " ORDER BY a.created_at DESC");
 
-// Data untuk Dropdown Filter
+
 $units = mysqli_query($koneksi, "SELECT * FROM unit_kerja ORDER BY nama_unit ASC");
 $kats  = mysqli_query($koneksi, "SELECT * FROM kategori ORDER BY nama_kategori ASC");
 
@@ -59,8 +59,8 @@ $page = 'data_arsip.php';
     <link rel="stylesheet" href="../../assets/css/style.css">
     <title>Data Arsip - SIAPSIJUNJUNG</title>
     <style>
-        /* 💡 KUNCI LAYAR SATU HALAMAN PENUH DESKTOP KHAS SIAPUS */
-        html, body {
+        html,
+        body {
             height: 100vh;
             overflow: hidden !important;
         }
@@ -129,7 +129,6 @@ $page = 'data_arsip.php';
             opacity: 0.8;
         }
 
-        /* 💡 CONFIG SCROLL LANGSUNG DI .TABLE-DATA & .ORDER BAWAAN ASLI MAS */
         .table-data {
             display: flex;
             flex-direction: column;
@@ -139,7 +138,7 @@ $page = 'data_arsip.php';
 
         .table-data .order {
             flex-grow: 1;
-            overflow-y: auto; /* Scroll langsung aktif di wadah aslinya */
+            overflow-y: auto;
             min-height: 0;
         }
 
@@ -150,16 +149,15 @@ $page = 'data_arsip.php';
             z-index: 10;
         }
 
-        /* Modifikasi scrollbar halus agar serasi */
         .table-data .order::-webkit-scrollbar {
             width: 5px;
         }
+
         .table-data .order::-webkit-scrollbar-thumb {
             background: var(--dark-grey);
             border-radius: 5px;
         }
 
-        /* 💡 MODIFIKASI BUTTON AKSI OUTLINE MINIMALIS & PREMIUM */
         .action-flex-group {
             display: flex;
             justify-content: center;
@@ -178,6 +176,7 @@ $page = 'data_arsip.php';
             font-size: 15px;
             transition: all 0.2s ease;
         }
+
         .btn-action-view:hover {
             background: #DB504A;
             color: #ffffff !important;
@@ -195,6 +194,7 @@ $page = 'data_arsip.php';
             font-size: 15px;
             transition: all 0.2s ease;
         }
+
         .btn-action-edit:hover {
             background: #3C91E6;
             color: #ffffff !important;
@@ -212,6 +212,7 @@ $page = 'data_arsip.php';
             font-size: 15px;
             transition: all 0.2s ease;
         }
+
         .btn-action-delete:hover {
             background: #E22B2B;
             color: #ffffff !important;
@@ -229,7 +230,7 @@ $page = 'data_arsip.php';
                     <h1>Data Arsip Digital</h1>
                 </div>
                 <?php if ($role !== 'pimpinan') : ?>
-                    <a href="arsip_tambah.php" class="btn-add" style="text-decoration: none;"><i class='bx bx-cloud-upload'></i><span class="text">Upload Arsip</span></a>
+                    <a href="arsip_tambah.php" class="btn-add" style="text-decoration: none;"><i class='bx bx-cloud-upload'></i><span class="text">Tambah Arsip</span></a>
                 <?php endif; ?>
             </div>
 
@@ -288,7 +289,7 @@ $page = 'data_arsip.php';
                                         <td><?= htmlspecialchars($row['nama_arsip']); ?></td>
                                         <td><?= $row['nama_unit'] ?? 'GLOBAL'; ?></td>
                                         <td><?= date('d/m/Y', strtotime($row['created_at'])); ?></td>
-                                        <td><span class="status pending"><?= $row['nama_kategori']; ?></span></td>
+                                        <td><span><?= $row['nama_kategori']; ?></span></td>
                                         <td style="text-align: center;">
                                             <div class="action-flex-group">
                                                 <a href="arsip_view.php?id=<?= $row['id_arsip']; ?>" class="btn-action-view" title="Lihat">
@@ -328,7 +329,7 @@ $page = 'data_arsip.php';
         const searchInput = document.getElementById('searchInput');
         const filterForm = document.getElementById('filterForm');
         let typingTimer;
-        const doneTypingInterval = 500; 
+        const doneTypingInterval = 500;
 
         searchInput.addEventListener('keyup', () => {
             clearTimeout(typingTimer);

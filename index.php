@@ -28,6 +28,7 @@ if (isset($_SESSION['login'])) {
 
         <div class="form-container sign-up">
             <form action="process/login_process.php" method="POST">
+                <input type="hidden" name="login_type" value="unit">
                 <h1 id="login-title">Login Unit</h1>
                 <p id="login-desc">Silakan masuk untuk mengelola arsip unit Anda.</p>
 
@@ -45,6 +46,7 @@ if (isset($_SESSION['login'])) {
 
         <div class="form-container sign-in">
             <form action="process/login_process.php" method="POST">
+                <input type="hidden" name="login_type" value="admin">
                 <h1>Login Admin</h1>
                 <p>Akses penuh konfigurasi sistem.</p>
                 <input type="text" name="username" placeholder="Username" required>

@@ -168,7 +168,7 @@ body {
     background:
         linear-gradient(rgba(0, 0, 0, 0.45),
             rgba(0, 0, 0, 0.45)),
-        url('../img/puskesmas.jpg') center;
+        url('../img/puskesmas2.png') center;
     color: #fff;
     position: relative;
     left: -100%;
@@ -186,7 +186,7 @@ body {
 
 .toggle-panel {
     background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-        url('../img/puskesmas.jpg');
+        url('../img/puskesmas2.png');
     background-size: cover;
     background-position: center;
     position: absolute;

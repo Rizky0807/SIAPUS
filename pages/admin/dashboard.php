@@ -78,57 +78,139 @@ $page = 'dashboard.php';
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
   <style>
+    /* 💡 AMANKAN VIEWPORT: Membuka jalur scroll internal saat zoom in ekstrim */
     html,
     body {
-      height: 100vh;
-      overflow: hidden !important;
+      min-height: 100vh;
+      overflow-y: auto !important;
     }
 
     #content main {
-      height: calc(100vh - 56px);
-      overflow: hidden;
+      min-height: calc(100vh - 56px);
       display: flex;
       flex-direction: column;
       padding: 24px;
       box-sizing: border-box;
     }
 
-    .head-title,
-    .box-info {
+    /* 💡 REVISI HERO WRAPPER: Menyatukan Banner & Card statistik dalam 1 background foto puskesmas */
+    .hero-container {
       flex-shrink: 0;
-      margin-bottom: 15px !important;
+      margin-bottom: 24px !important;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(67, 66, 66, 0.47) 50%, rgba(17, 153, 19, 0.67) 100%),
+                url('../../assets/img/puskesmas2.png');
+      background-size: cover;
+      background-position: center;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     }
 
-    .head-title,
-    h3 {
-      color: var(--dark);
+    /* Hilangkan background & style banner lama karena sudah dilingkupi container baru */
+    .head-title {
+      background: transparent !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      margin-bottom: 20px !important;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
+    .head-title .left h1 {
+      color: #ffffff !important;
+      font-size: 26px;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .head-title .left p {
+      color: #f1f5f9 !important;
+      font-size: 14px;
+      margin-top: 4px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .head-title .right h4 {
+      color: #ffffff !important;
+      font-size: 16px;
+      margin: 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .head-title .right p {
+      color: #e2e8f0 !important;
+      font-size: 11px;
+      margin-top: 2px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Penataan Box Info di dalam container hero */
+    .box-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-gap: 20px !important;
+      margin-top: 0px !important;
+      margin-bottom: 5px !important;
+    }
+
+    /* 💡 ESTETIK GLASSMORPHISM: Card statistik semi-transparan putih mewah */
+    .box-info li {
+      padding: 15px 20px !important;
+      background: rgba(255, 255, 255, 0.92) !important;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 15px !important;
+      display: flex;
+      align-items: center;
+      grid-gap: 20px !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+      transition: transform 0.3s ease;
+    }
+
+    .box-info li:hover {
+      transform: translateY(-3px);
+    }
+
+    /* 💡 KUNCI STRATEGI: Memaksa sejajar lurus dari container induk */
     .info-data {
       display: grid;
       grid-template-columns: 1.2fr 1fr;
-      /* Sedikit dilebarkan porsi kiri untuk tabel */
       gap: 24px;
       flex-grow: 1;
       min-height: 0;
-      align-items: stretch;
+      /* 🛠️ SINKRONISASI MUTLAK: Paksa kepala grid kiri & kanan sejajar rata atas satu garis */
+      align-items: start !important;
+      /* Jarak pas antara card statistik di atas dengan panel data di bawah */
+      margin-top: 20px !important;
     }
 
-    /* 🎨 STYLE TABEL MODERN */
+    @media (max-width: 1100px) {
+      .info-data {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 🎨 STYLE TABEL MODERN (RATA ATAS & SAMAKAN PADDING) */
     .table-data {
       background: var(--white-card);
-      padding: 25px;
+      /* 🛠️ DISERAGAMKAN: Atas-bawah 24px, kiri-kanan 25px */
+      padding: 24px 25px !important;
       border-radius: 20px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
       display: flex;
       flex-direction: column;
-      min-height: 0;
+      box-sizing: border-box;
+      width: 100%;
+      margin-top: 0px !important;
+      /* Reset margin bawaan style.css biar ngga tolak-menolak */
     }
 
     .activity-scroll-area {
       flex-grow: 1;
       overflow-y: auto;
       padding-right: 5px;
+      max-height: 380px;
     }
 
     .modern-table {
@@ -166,30 +248,43 @@ $page = 'dashboard.php';
       font-weight: 600;
     }
 
-    /* 💡 CEGAH GRAFIK PENYEK */
     .right-dashboard-panel {
       display: flex;
       flex-direction: column;
-      min-height: 0;
+      width: 100%;
     }
 
+    /* 🎨 STYLE GRAFIK MODERN (SAMAKAN PADDING ATAS AGAR SEJAJAR) */
     .chart-card {
-      background: var(--light);
-      padding: 25px;
+      background: var(--white-card);
+      /* 🛠️ DISERAGAMKAN: Wajib sama persis dengan .table-data biar teks judul sejajar lurus */
+      padding: 24px 25px !important;
       border-radius: 20px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      border: 1px solid var(--border-color, transparent);
       display: flex;
       flex-direction: column;
-      height: 100%;
-      min-height: 0;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    /* 🛠️ KUNCI SINKRONISASI BARIS JUDUL INTERN */
+    .table-data .head,
+    .chart-card .head {
+      height: 32px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      margin-bottom: 20px !important;
+      flex-shrink: 0 !important;
+      box-sizing: border-box !important;
+      width: 100%;
     }
 
     .chart-container-wrapper {
       flex-grow: 1;
-      /* Biar grafik ambil sisa ruang paling banyak */
       min-height: 200px;
       position: relative;
+      width: 100%;
     }
 
     .chart-caption-box {
@@ -204,9 +299,8 @@ $page = 'dashboard.php';
     .legend-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 8px;
-      max-height: 90px;
-      /* Batasi tinggi legenda biar grafik gak penyek */
+      gap: 5px;
+      max-height: 140px;
       overflow-y: auto;
     }
 
@@ -237,15 +331,6 @@ $page = 'dashboard.php';
       background: var(--dark-grey);
       border-radius: 5px;
     }
-
-    .h3 {
-      color: var(--dark);
-    }
-
-    .h3,
-    p {
-      color: var(--dark);
-    }
   </style>
 </head>
 
@@ -256,48 +341,50 @@ $page = 'dashboard.php';
     <?php include '../partials/navbar.php'; ?>
 
     <main>
-      <div class="head-title">
-        <div class="left">
-          <h1>Dashboard Admin</h1>
-          <p style="color: var(--dark-grey); font-size: 14px; margin-top: 2px;">
-            Selamat datang Administrator, <span style="color: var(--green); font-weight: 600;">
-              <?= isset($_SESSION['nama']) ? $_SESSION['nama'] : 'Administrator'; ?>
-            </span>! 👋
-          </p>
-        </div>
-        <div class="right" style="text-align: right;">
-          <h4 id="clock" style="color: var(--dark); margin: 0; font-size: 16px;"></h4>
-          <p style="color: var(--dark-grey); font-size: 11px; margin-top: 1px;"><?= date('l, d F Y') ?></p>
-        </div>
-      </div>
+      <div class="hero-container">
 
-      <ul class="box-info">
-        <li>
-          <i class='bx bxs-file-archive'></i>
-          <span class="text">
-            <h3><?= $count_arsip; ?></h3>
-            <p>Total Arsip</p>
-          </span>
-        </li>
-        <li>
-          <i class='bx bxs-group'></i>
-          <span class="text">
-            <h3><?= $count_user; ?></h3>
-            <p>Pengguna</p>
-          </span>
-        </li>
-        <li>
-          <i class='bx bxs-city'></i>
-          <span class="text">
-            <h3><?= $count_unit; ?></h3>
-            <p>Unit Kerja</p>
-          </span>
-        </li>
-      </ul>
+        <div class="head-title">
+          <div class="left">
+            <h1>Dashboard Admin</h1>
+            <p>
+              Selamat datang Administrator, <span style="background: rgba(130, 237, 122, 0.2); color: #ffffff; padding: 2px 10px; border-radius: 20px; font-weight: 700; border: 1px solid rgba(130, 237, 122, 0.3);"><?= isset($_SESSION['nama']) ? $_SESSION['nama'] : 'Admin'; ?></span>! 👋
+            </p>
+          </div>
+          <div class="right" style="text-align: right;">
+            <h4 id="clock">23:49:02</h4>
+            <p><?= date('l, d F Y') ?></p>
+          </div>
+        </div>
+
+        <ul class="box-info">
+          <li>
+            <i class='bx bxs-file-archive'></i>
+            <span class="text">
+              <h3><?= $count_arsip; ?></h3>
+              <p>Total Arsip</p>
+            </span>
+          </li>
+          <li>
+            <i class='bx bxs-group'></i>
+            <span class="text">
+              <h3><?= $count_user; ?></h3>
+              <p>Pengguna</p>
+            </span>
+          </li>
+          <li>
+            <i class='bx bxs-city'></i>
+            <span class="text">
+              <h3><?= $count_unit; ?></h3>
+              <p>Unit Kerja</p>
+            </span>
+          </li>
+        </ul>
+
+      </div>
 
       <div class="info-data">
         <div class="table-data">
-          <div class="head" style="margin-bottom: 15px; flex-shrink: 0; display: flex; justify-content: space-between;">
+          <div class="head">
             <h3 style="font-size: 16px; color: var(--dark); font-weight: 600;">Log Aktivitas Unggahan</h3>
             <small style="color: var(--dark-grey); font-size: 11px;">Aktivitas Terkini</small>
           </div>
@@ -324,7 +411,7 @@ $page = 'dashboard.php';
                   <?php endwhile; ?>
                 <?php else: ?>
                   <tr>
-                    <td colspan="4" style="text-align: center; color: var(--dark-grey);">Belum ada aktivitas.</td>
+                    <td colspan="3" style="text-align: center; color: var(--dark-grey);">Belum ada aktivitas.</td>
                   </tr>
                 <?php endif; ?>
               </tbody>
@@ -334,7 +421,7 @@ $page = 'dashboard.php';
 
         <div class="right-dashboard-panel">
           <div class="chart-card">
-            <div class="head" style="margin-bottom: 15px; flex-shrink: 0;">
+            <div class="head">
               <h3 style="font-size: 16px; color: var(--dark); font-weight: 600;">Persentase Distribusi Arsip Per Unit Kerja</h3>
             </div>
 
@@ -344,9 +431,9 @@ $page = 'dashboard.php';
 
             <div class="chart-caption-box">
               <div class="legend-grid">
-              <div class="head" style="flex-shrink: 0;">
-              <h3 style="font-size: 13px; color: var(--dark); font-weight: 600;"><i class='bx bx-paint' style="padding-right:5px; color: #4cbb17; vertical-align: middle; font-size: 16px;"></i>Indikator dan Kontribusi Unit Kerja</h3>
-            </div>
+                <div class="head">
+                  <h3 style="font-size: 13px; color: var(--dark); font-weight: 600;"><i class='bx bx-paint' style="padding-right:5px; color: #4cbb17; vertical-align: middle; font-size: 16px;"></i>Indikator dan Kontribusi Unit Kerja</h3>
+                </div>
                 <?php foreach ($unit_legend_data as $legend): ?>
                   <div class="legend-item">
                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -372,7 +459,7 @@ $page = 'dashboard.php';
     gradientBg.addColorStop(0, 'rgba(55, 211, 58, 0.43)');
     gradientBg.addColorStop(1, 'rgba(55, 211, 58, 0.14)');
 
-    new Chart(ctxLine, {
+    const myLineChart = new Chart(ctxLine, {
       type: 'line',
       plugins: [ChartDataLabels],
       data: {
@@ -459,6 +546,11 @@ $page = 'dashboard.php';
           }
         }
       }
+    });
+
+    window.addEventListener('resize', () => {
+      myLineChart.resize();
+      myLineChart.update();
     });
   </script>
 

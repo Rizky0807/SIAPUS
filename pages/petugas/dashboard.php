@@ -49,7 +49,7 @@ while ($row_kat = mysqli_fetch_assoc($result_kat_unit)) {
     $jumlah_k = (int)$row_kat['total_arsip'];
     $kat_totals[] = $jumlah_k;
     $kat_names_real[] = $row_kat['nama_kategori'];
-    
+
     $persen_k = ($total_arsip > 0) ? round(($jumlah_k / $total_arsip) * 100, 1) : 0;
     $kat_percentages[] = $persen_k;
     $assigned_color = $color_palette[($nomor_indeks - 1) % count($color_palette)];
@@ -75,57 +75,130 @@ $page = 'dashboard.php';
     <link rel="stylesheet" href="../../assets/boxicons-2.1.4/css/boxicons.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
     <title>Dashboard Petugas - SIAPSIJUNJUNG</title>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
     <style>
-        html, body {
-            height: 100vh;
-            overflow: hidden !important;
+        /* 💡 AMANKAN VIEWPORT: Membuka jalur scroll internal saat zoom in ekstrim */
+        html,
+        body {
+            min-height: 100vh;
+            overflow-y: auto !important;
         }
 
         #content main {
-            height: calc(100vh - 56px);
-            overflow: hidden;
+            min-height: calc(100vh - 56px);
             display: flex;
             flex-direction: column;
             padding: 24px;
             box-sizing: border-box;
         }
 
-        .head-title, .box-info {
+        /* 💡 REVISI HERO WRAPPER: Menyatukan Banner & Card statistik dalam 1 background foto puskesmas */
+        .hero-container {
             flex-shrink: 0;
-            margin-bottom: 15px !important;
+            margin-bottom: 24px !important;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(67, 66, 66, 0.47) 50%, rgba(17, 153, 19, 0.67) 100%),
+                url('../../assets/img/puskesmas2.png');
+            background-size: cover;
+            background-position: center;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
         }
 
+        /* Hilangkan background & style banner lama karena sudah dilingkupi container baru */
+        .head-title {
+            background: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin-bottom: 20px !important;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .head-title .left h1 {
+            color: #ffffff !important;
+            font-size: 26px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .head-title .left p {
+            color: #f1f5f9 !important;
+            font-size: 14px;
+            margin-top: 4px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Penataan Box Info di dalam container hero */
+        .box-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-gap: 20px !important;
+            margin-top: 0px !important;
+            margin-bottom: 5px !important;
+        }
+
+        /* 💡 ESTETIK GLASSMORPHISM: Card statistik semi-transparan putih mewah */
+        .box-info li {
+            padding: 15px 20px !important;
+            background: rgba(255, 255, 255, 0.92) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 15px !important;
+            display: flex;
+            align-items: center;
+            grid-gap: 20px !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+            transition: transform 0.3s ease;
+        }
+
+        .box-info li:hover {
+            transform: translateY(-3px);
+        }
+
+        /* 💡 KUNCI STRATEGI BARU: Memaksa sejajar lurus dari container induk */
         .info-data {
             display: grid;
             grid-template-columns: 1.2fr 1fr;
             gap: 24px;
             flex-grow: 1;
             min-height: 0;
-            align-items: stretch;
+            /* 🛠 nighttime fix: Paksa kepala grid kiri & kanan sejajar rata atas satu garis */
+            align-items: start !important;
+            /* Jarak pas antara card statistik di atas dengan panel data di bawah */
+            margin-top: 20px !important;
         }
 
-        @media (max-width: 991px) {
-            .info-data { grid-template-columns: 1fr; overflow-y: auto; }
+        @media (max-width: 1100px) {
+            .info-data {
+                grid-template-columns: 1fr;
+            }
         }
 
+        /* 🎨 STYLE TABEL MODERN (RATA ATAS & SAMAKAN PADDING) */
         .table-data {
             background: var(--white-card, #fff);
-            padding: 25px;
+            /* 🛠️ DISERAGAMKAN: Atas-bawah 24px, kiri-kanan 25px */
+            padding: 24px 25px !important;
             border-radius: 20px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
-            min-height: 0;
+            box-sizing: border-box;
+            width: 100%;
+            margin-top: 0px !important;
+            /* Reset margin bawaan style.css */
         }
 
         .activity-scroll-area {
             flex-grow: 1;
             overflow-y: auto;
             padding-right: 5px;
+            max-height: 380px;
         }
 
         .modern-table {
@@ -163,31 +236,46 @@ $page = 'dashboard.php';
         .right-dashboard-panel {
             display: flex;
             flex-direction: column;
-            min-height: 0;
+            width: 100%;
         }
 
+        /* 🎨 STYLE GRAFIK MODERN (SAMAKAN PADDING ATAS AGAR SEJAJAR) */
         .chart-card {
-            background: var(--light, #f8fafc);
-            padding: 25px;
+            background: var(--white-card, #fff);
+            /* 🛠️ DISERAGAMKAN: Wajib sama persis dengan .table-data biar teks judul sejajar lurus */
+            padding: 24px 25px !important;
             border-radius: 20px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border-color, transparent);
             display: flex;
             flex-direction: column;
-            height: 100%;
-            min-height: 0;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        /* 🛠️ KUNCI SINKRONISASI BARIS JUDUL INTERN */
+        .table-data .head,
+        .chart-card .head {
+            height: 32px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            margin-bottom: 20px !important;
+            flex-shrink: 0 !important;
+            box-sizing: border-box !important;
+            width: 100%;
         }
 
         .chart-container-wrapper {
             flex-grow: 1;
             min-height: 200px;
             position: relative;
+            width: 100%;
         }
 
         .chart-caption-box {
             margin-top: 15px;
             padding: 12px;
-            background: var(--white-card, #fff);
+            background: var(--light, #f8fafc);
             border-top: 3px solid #4cbb17;
             border-radius: 8px;
             flex-shrink: 0;
@@ -197,7 +285,7 @@ $page = 'dashboard.php';
             display: grid;
             grid-template-columns: 1fr;
             gap: 8px;
-            max-height: 90px;
+            max-height: 140px;
             overflow-y: auto;
         }
 
@@ -220,7 +308,6 @@ $page = 'dashboard.php';
 
         .legend-badge {
             font-weight: 700;
-            font-family: 'Poppins', sans-serif;
         }
 
         .activity-scroll-area::-webkit-scrollbar,
@@ -241,35 +328,38 @@ $page = 'dashboard.php';
     <section id="content">
         <?php include '../partials/navbar.php'; ?>
         <main>
-            <div class="head-title">
-                <div class="left">
-                    <h1>Dashboard Petugas</h1>
-                    <p style="color: var(--dark-grey); font-size: 14px; margin-top: 2px;">
-                        Selamat Datang, <strong style="color: var(--dark);"><?= $nama_user; ?></strong> | Unit <span style="color: var(--green); font-weight: 600;"><?= $_SESSION['nama_unit'] ?? 'Unit Kerja'; ?></span>
-                    </p>
+            <div class="hero-container">
+
+                <div class="head-title">
+                    <div class="left">
+                        <h1>Dashboard Petugas</h1>
+                        <p style="color: #f1f5f9 !important; font-size: 14px; margin-top: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
+                            Selamat Datang, <strong style="color: #ffffff;"><?= $nama_user; ?></strong> | Unit <span style="background: rgba(130, 237, 122, 0.2); color: #ffffff; padding: 2px 10px; border-radius: 20px; font-weight: 700; border: 1px solid rgba(130, 237, 122, 0.3);"><?= $_SESSION['nama_unit'] ?? 'Unit Kerja'; ?></span>
+                        </p>
+                    </div>
                 </div>
+
+                <ul class="box-info">
+                    <li>
+                        <i class='bx bxs-file-pdf'></i>
+                        <span class="text">
+                            <h3><?= $total_arsip; ?></h3>
+                            <p>Total Arsip Unit Anda</p>
+                        </span>
+                    </li>
+                    <li>
+                        <i class='bx bxs-category'></i>
+                        <span class="text">
+                            <h3><?= $total_kat; ?></h3>
+                            <p>Kategori Terpakai</p>
+                        </span>
+                    </li>
+                </ul>
+
             </div>
-
-            <ul class="box-info">
-                <li>
-                    <i class='bx bxs-file-pdf'></i>
-                    <span class="text">
-                        <h3 style="color: var(--dark);"><?= $total_arsip; ?></h3>
-                        <p style="color: var(--dark);">Total Arsip Unit Anda</p>
-                    </span>
-                </li>
-                <li>
-                    <i class='bx bxs-category'></i>
-                    <span class="text">
-                        <h3 style="color: var(--dark);"><?= $total_kat; ?></h3>
-                        <p style="color: var(--dark);">Kategori Terpakai</p>
-                    </span>
-                </li>
-            </ul>
-
             <div class="info-data">
                 <div class="table-data">
-                    <div class="head" style="margin-bottom: 15px; flex-shrink: 0; display: flex; justify-content: space-between;">
+                    <div class="head">
                         <h3 style="font-size: 16px; color: var(--dark); font-weight: 600;">Arsip Terbaru Unit Anda</h3>
                         <small style="color: var(--dark-grey); font-size: 11px;">Data Internal</small>
                     </div>
@@ -290,12 +380,14 @@ $page = 'dashboard.php';
                                         <tr>
                                             <td><span style="font-family: monospace; font-weight: bold; color: var(--dark);"><?= $row['kode_arsip']; ?></span></td>
                                             <td style="max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= htmlspecialchars($row['nama_arsip']); ?></td>
-                                            <td><span class="badge-cat"><?= htmlspecialchars($row['nama_kategori']); ?></span></td>
+                                            <td><span class="badge-cat" style="background: var(--light-green); color: var(--green); padding: 2px 8px; border-radius: 20px; font-size: 11px;"><?= htmlspecialchars($row['nama_kategori']); ?></span></td>
                                             <td style="color: var(--dark-grey); font-size: 12px;"><?= date('d/m/Y', strtotime($row['created_at'])); ?></td>
                                         </tr>
                                     <?php endwhile; ?>
                                 <?php else: ?>
-                                    <tr><td colspan="4" style="text-align: center; color: var(--dark-grey); padding: 30px;">Unit Anda belum mengunggah berkas.</td></tr>
+                                    <tr>
+                                        <td colspan="4" style="text-align: center; color: var(--dark-grey); padding: 30px;">Unit Anda belum mengunggah berkas.</td>
+                                    </tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
@@ -304,8 +396,8 @@ $page = 'dashboard.php';
 
                 <div class="right-dashboard-panel">
                     <div class="chart-card">
-                        <div class="head" style="margin-bottom: 15px; flex-shrink: 0;">
-                            <h3 style="font-size: 16px; color: var(--dark); font-weight: 600;">Persentase Distribusi Kategori </h3>
+                        <div class="head">
+                            <h3 style="font-size: 16px; color: var(--dark); font-weight: 600;">Persentase Distribusi Kategori</h3>
                         </div>
 
                         <div class="chart-container-wrapper">
@@ -314,18 +406,18 @@ $page = 'dashboard.php';
 
                         <div class="chart-caption-box">
                             <div class="legend-grid">
-                                <div class="head" style="flex-shrink: 0; margin-bottom: 5px;">
+                                <div class="head">
                                     <h3 style="font-size: 13px; color: var(--dark); font-weight: 600;"><i class='bx bx-paint' style="padding-right:5px; color: #4cbb17; vertical-align: middle; font-size: 16px;"></i>Indikator Kategori Internal</h3>
                                 </div>
-                                <?php if(count($kat_legend_data) > 0): ?>
+                                <?php if (count($kat_legend_data) > 0): ?>
                                     <?php foreach ($kat_legend_data as $legend): ?>
-                                      <div class="legend-item">
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                          <span class="color-dot" style="background-color: <?= $legend['warna']; ?>;"></span>
-                                          <span><?= htmlspecialchars($legend['nama']); ?></span>
+                                        <div class="legend-item">
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span class="color-dot" style="background-color: <?= $legend['warna']; ?>;"></span>
+                                                <span><?= htmlspecialchars($legend['nama']); ?></span>
+                                            </div>
+                                            <span class="legend-badge" style="color: #4cbb17;"><?= $legend['persen']; ?>%</span>
                                         </div>
-                                        <span class="legend-badge" style="color: #4cbb17;"><?= $legend['persen']; ?>%</span>
-                                      </div>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <div class="legend-item" style="justify-content: center; font-style: italic;">Belum menggunakan kategori dokumen.</div>
@@ -342,12 +434,12 @@ $page = 'dashboard.php';
         const ctxLine = document.getElementById('cleanLineChart').getContext('2d');
         const realUnitNames = <?= json_encode($kat_names_real); ?>;
         const realUnitTotals = <?= json_encode($kat_totals); ?>;
-        
+
         const gradientBg = ctxLine.createLinearGradient(0, 0, 0, 180);
         gradientBg.addColorStop(0, 'rgba(55, 211, 58, 0.43)');
         gradientBg.addColorStop(1, 'rgba(55, 211, 58, 0.14)');
 
-        new Chart(ctxLine, {
+        const myLineChart = new Chart(ctxLine, {
             type: 'line',
             plugins: [ChartDataLabels],
             data: {
@@ -356,26 +448,49 @@ $page = 'dashboard.php';
                     data: <?= json_encode($kat_percentages); ?>,
                     borderColor: '#4cbb17',
                     backgroundColor: gradientBg,
-                    fill: true, tension: 0.4, borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
                     pointBackgroundColor: <?= json_encode(array_column($kat_legend_data, 'warna')); ?>,
-                    pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                layout: { padding: { left: 15, right: 15, top: 15, bottom: 5 } },
+                layout: {
+                    padding: {
+                        left: 15,
+                        right: 15,
+                        top: 15,
+                        bottom: 5
+                    }
+                },
                 plugins: {
-                    legend: { display: false },
+                    legend: {
+                        display: false
+                    },
                     datalabels: {
-                        anchor: 'end', align: 'top', color: '#4cbb17',
-                        font: { weight: '700', size: 10 },
-                        formatter: function(value) { return value + '%'; }
+                        anchor: 'end',
+                        align: 'top',
+                        color: '#4cbb17',
+                        font: {
+                            weight: '700',
+                            size: 10
+                        },
+                        formatter: function(value) {
+                            return value + '%';
+                        }
                     },
                     tooltip: {
                         enabled: true,
                         callbacks: {
-                            title: function(context) { return realUnitNames[context[0].dataIndex]; },
+                            title: function(context) {
+                                return realUnitNames[context[0].dataIndex];
+                            },
                             label: function(context) {
                                 return [
                                     ' Jumlah: ' + realUnitTotals[context.dataIndex] + ' berkas',
@@ -386,10 +501,36 @@ $page = 'dashboard.php';
                     }
                 },
                 scales: {
-                    x: { ticks: { display: false }, grid: { display: false }, border: { display: false } },
-                    y: { grace: '20%', ticks: { display: false }, grid: { display: false }, border: { display: false } }
+                    x: {
+                        ticks: {
+                            display: false
+                        },
+                        grid: {
+                            display: false
+                        },
+                        border: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        grace: '20%',
+                        ticks: {
+                            display: false
+                        },
+                        grid: {
+                            display: false
+                        },
+                        border: {
+                            display: false
+                        }
+                    }
                 }
             }
+        });
+
+        window.addEventListener('resize', () => {
+            myLineChart.resize();
+            myLineChart.update();
         });
     </script>
     <script src="../../assets/js/script.js"></script>

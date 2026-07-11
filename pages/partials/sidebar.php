@@ -51,7 +51,7 @@ $role = $_SESSION['role']; // Ambil role dari session login
             </li>
         <?php endif; ?>
 
-        <li class="<?= ($page == 'data_arsip.php' || $page == 'surat_masuk.php' || $page == 'surat_keluar.php') ? 'active' : '' ?>">
+        <li class="<?= ($page == 'data_arsip.php') ? 'active' : '' ?>">
             <a href="data_arsip.php">
                 <i class='bx bxs-file-blank'></i>
                 <span class="text">Data Arsip</span>

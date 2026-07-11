@@ -249,45 +249,6 @@ $page = 'log_aktivitas.php';
         background: var(--dark-grey);
         border-radius: 5px;
     }
-
-    .print-only {
-        display: none !important;
-    }
-
-    /* CETAK/PRINT PREVIEW LEMBARAN KERTAS */
-    @media print {
-        #sidebar, nav, #navbar, header, .breadcrumb, .filter-card-custom, .action-box {
-            display: none !important;
-        }
-
-        #content, main, body {
-            width: 100% !important; left: 0 !important; padding: 0 !important; margin: 0 !important;
-            position: static !important; overflow: visible !important; height: auto !important;
-        }
-
-        body { background: #fff !important; color: #000 !important; }
-        .print-only { display: block !important; }
-        .head h3 { color: #000 !important; font-size: 12px !important; margin-top: 15px; }
-        
-        .table-data, .order {
-            box-shadow: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important;
-            background: #fff !important; overflow: visible !important; height: auto !important; border-radius: 0 !important;
-        }
-
-        table {
-            width: 100% !important; border-collapse: collapse !important; margin-top: 5px; margin-bottom: 20px;
-            page-break-inside: auto !important; border-radius: 0 !important;
-        }
-
-        tr { page-break-inside: avoid !important; page-break-after: auto !important; }
-        th, td {
-            border: 1px solid #000 !important; padding: 8px !important; font-size: 12px !important;
-            color: #000 !important; border-radius: 0 !important;
-        }
-
-        th { background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .print-signature { page-break-inside: avoid !important; }
-    }
 </style>
 
 <body>
@@ -306,64 +267,6 @@ $page = 'log_aktivitas.php';
                         <li><a class="active" href="#">Log Aktivitas</a></li>
                     </ul>
                 </div>
-
-                <div class="action-box">
-                    <button onclick="window.print()" class="btn-action-custom" style="background: var(--green); border-radius: 10px;">
-                        <i class='bx bxs-printer' style="font-size: 14px;"></i>
-                        <span class="text">Cetak Log Aktivitas</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="print-only" style="margin-bottom: 20px;">
-                <table style="width: 100%; border: none !important; border-collapse: collapse !important; margin-bottom: 5px !important;">
-                    <tr style="border: none !important;">
-                        <td style="width: 12%; text-align: center; border: none !important; padding: 0 !important; vertical-align: middle;">
-                            <img src="../../assets/img/logo_sijunjung.png" alt="Logo Sijunjung" style="width: 70px; height: auto;">
-                        </td>
-                        <td style="text-align: center; border: none !important; padding: 0 10px !important; vertical-align: middle; line-height: 1.3;">
-                            <h3 style="text-transform: uppercase; margin: 0; font-size: 15px; font-weight: 700; color: #000;">Pemerintah Kabupaten Sijunjung</h3>
-                            <h2 style="text-transform: uppercase; margin: 2px 0; font-size: 16px; font-weight: 700; color: #000;">Dinas Kesehatan</h2>
-                            <h1 style="text-transform: uppercase; margin: 2px 0; font-size: 19px; font-weight: 800; color: #000; letter-spacing: 0.5px;">UPTD Puskesmas Sijunjung</h1>
-                            <p style="margin: 3px 0 0 0; font-size: 11px; color: #000;">Jl. Puskesmas No.85 Jorong Pasar, Nagari Sijunjung, Kecamatan Sijunjung</p>
-                            <p style="margin: 1px 0 0 0; font-size: 10px; font-style: italic; color: #000;">E-mail: puskesmassijunjung@sijunjung.go.id | Kode Pos: 27553</p>
-                        </td>
-                        <td style="width: 12%; text-align: center; border: none !important; padding: 0 !important; vertical-align: middle;">
-                            <img src="../../assets/img/logo_baktihusada.png" alt="Logo Puskesmas" style="width: 65px; height: auto;">
-                        </td>
-                    </tr>
-                </table>
-                <div style="border-top: 3px solid #000; border-bottom: 1px solid #000; height: 2px; margin-top: 8px; margin-bottom: 15px;"></div>
-            </div>
-
-            <div class="print-only" style="margin-bottom: 20px; font-size: 12px; line-height: 1.6;">
-                <table style="width: 100%; border: none !important; margin: 0 !important;">
-                    <tr style="border: none !important;">
-                        <td style="width: 18%; border: none !important; padding: 2px !important;"><strong>Jenis Dokumen</strong></td>
-                        <td style="width: 2%; border: none !important; padding: 2px !important;">:</td>
-                        <td style="border: none !important; padding: 2px !important;">Laporan Log Aktivitas Sistem Global</td>
-                        <td style="width: 15%; border: none !important; padding: 2px !important;"><strong>Dicetak Oleh</strong></td>
-                        <td style="width: 2%; border: none !important; padding: 2px !important;">:</td>
-                        <td style="border: none !important; padding: 2px !important;"><?= htmlspecialchars($nama_user); ?> (<?= ucfirst($role); ?>)</td>
-                    </tr>
-                    <tr style="border: none !important;">
-                        <td style="border: none !important; padding: 2px !important;"><strong>Status Akses</strong></td>
-                        <td style="border: none !important; padding: 2px !important;">:</td>
-                        <td style="border: none !important; padding: 2px !important;">Pimpinan Resmi (Hak Monitoring Global)</td>
-                        <td style="width: 15%; border: none !important; padding: 2px !important;"><strong>Periode Log</strong></td>
-                        <td style="width: 2%; border: none !important; padding: 2px !important;">:</td>
-                        <td style="border: none !important; padding: 2px !important;">
-                            <?php 
-                                if($f_bulan != '' || $f_tahun != '') {
-                                    echo ($f_bulan != '' ? $nama_bulan_indo[$f_bulan] . " " : "") . ($f_tahun != '' ? $f_tahun : "");
-                                } else {
-                                    echo "Semua Periode";
-                                }
-                            ?>
-                        </td>
-                    </tr>
-                </table>
-                <hr style="border: 1px solid #000; margin-top: 15px;">
             </div>
 
             <div class="filter-card-custom">
@@ -493,16 +396,6 @@ $page = 'log_aktivitas.php';
                             <?php endif; ?>
                         </tbody>
                     </table>
-
-                    <div class="print-only print-signature" style="margin-top: 60px; display: flex; justify-content: flex-end;">
-                        <div style="text-align: center; width: 250px; font-size: 13px;">
-                            <p>Sijunjung, <?= date('d F Y'); ?></p>
-                            <p>Mengetahui,</p>
-                            <p style="font-weight: bold; margin-bottom: 70px;">Kepala Puskesmas Sijunjung</p>
-                            <p>__________________________</p>
-                            <p style="color: #333;">NIP. ............................</p>
-                        </div>
-                    </div>
 
                 </div>
             </div>

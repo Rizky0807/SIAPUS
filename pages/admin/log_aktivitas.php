@@ -340,13 +340,6 @@ $page = 'log_aktivitas.php';
                         </td>
                     </tr>
                 </table>
-                <table style="width: 100%; border: none !important; margin: 0 !important;">
-                    <tr style="border: none !important;">
-                        <td style="border: none !important; padding: 2px !important; text-align: left; font-style: italic; color: #444;">
-                            *Catatan: Sesuai kebijakan optimalisasi database, aktivitas masuk (Login) dan keluar (Logout) sistem tidak direkapitulasi dalam audit trail.
-                        </td>
-                    </tr>
-                </table>
                 <hr style="border: 1px solid #000; margin-top: 15px;">
             </div>
 

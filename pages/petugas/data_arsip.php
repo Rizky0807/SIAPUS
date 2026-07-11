@@ -203,7 +203,7 @@ $page = 'data_arsip.php';
                     <h1>Data Arsip Digital</h1>
                 </div>
                 <?php if ($role != 'pimpinan') : ?>
-                    <a href="arsip_tambah.php" class="btn-add" style="text-decoration: none;"><i class='bx bx-cloud-upload'></i><span class="text">Upload Arsip</span></a>
+                    <a href="arsip_tambah.php" class="btn-add" style="text-decoration: none;"><i class='bx bx-cloud-upload'></i><span class="text">Tambah Arsip</span></a>
                 <?php endif; ?>
             </div>
 

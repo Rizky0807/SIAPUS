@@ -13,8 +13,10 @@ if (!isset($koneksi)) {
     die("Terjadi kesalahan koneksi database.");
 }
 
-$username = trim($_POST['username'] ?? '');
-$password = $_POST['password'] ?? '';
+$username   = trim($_POST['username'] ?? '');
+$password   = $_POST['password'] ?? '';
+$login_type = $_POST['login_type'] ?? '';
+$role_input = $_POST['role'] ?? '';
 
 if ($username === '' || $password === '') {
 
@@ -23,6 +25,18 @@ if ($username === '' || $password === '') {
             window.location='../index.php';
           </script>";
     exit;
+}
+
+if ($login_type === 'unit') {
+    $allowed_roles = ['petugas', 'pimpinan'];
+
+    if (!in_array($role_input, $allowed_roles, true)) {
+        echo "<script>
+                alert('Silakan pilih peran Petugas atau Pimpinan.');
+                window.location='../index.php';
+              </script>";
+        exit;
+    }
 }
 
 $sql = "SELECT
@@ -68,6 +82,30 @@ if ($data['status'] !== 'aktif') {
             window.location='../index.php';
           </script>";
 
+    exit;
+}
+
+if ($login_type === 'admin') {
+    if ($data['role'] !== 'admin') {
+        echo "<script>
+                alert('Akun ini bukan akun Administrator. Silakan login melalui halaman Login Unit.');
+                window.location='../index.php';
+              </script>";
+        exit;
+    }
+} elseif ($login_type === 'unit') {
+    if ($data['role'] !== $role_input) {
+        echo "<script>
+                alert('Peran yang dipilih tidak sesuai dengan akun Anda!');
+                window.location='../index.php';
+              </script>";
+        exit;
+    }
+} else {
+    echo "<script>
+            alert('Jenis login tidak valid.');
+            window.location='../index.php';
+          </script>";
     exit;
 }
 
