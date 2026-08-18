@@ -1,4 +1,4 @@
-    <?php
+<?php
     session_start();
 
     date_default_timezone_set('Asia/Jakarta');
@@ -21,10 +21,35 @@
         '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
     ];
 
-    // 1. Inisialisasi Filter Baru (Bulan, Tahun, Unit Kerja)
+    // 1. Inisialisasi Filter Baru (Tanggal Harian, Bulan, Tahun, Unit Kerja)
     $f_unit = $_GET['filter_unit'] ?? '';
     $f_bulan = $_GET['filter_bulan'] ?? '';
     $f_tahun = $_GET['filter_tahun'] ?? '';
+    $f_tanggal = $_GET['filter_tanggal'] ?? '';
+
+    // 💡 SOLUSI OTOMATIS RESET TANGGAL JIKA BULAN/TAHUN BERUBAH DAN TIDAK SINKRON
+    if ($f_tanggal != '') {
+        $cek_bulan = date('m', strtotime($f_tanggal));
+        $cek_tahun = date('Y', strtotime($f_tanggal));
+        
+        // Jika pimpinan set bulan/tahun tapi tanggal lama tidak cocok, kosongkan tanggalnya!
+        if (($f_bulan != '' && $f_bulan !== $cek_bulan) || ($f_tahun != '' && $f_tahun !== $cek_tahun)) {
+            $f_tanggal = '';
+        }
+    }
+
+    // LOGIKA BATAS TANGGAL BERANTAI DINAMIS
+    $min_date = "";
+    $max_date = "";
+    $tahun_aktif = ($f_tahun != '') ? $f_tahun : date('Y');
+
+    if ($f_bulan != '') {
+        $min_date = $tahun_aktif . '-' . $f_bulan . '-01';
+        $max_date = date("Y-m-t", strtotime($min_date)); 
+    } elseif ($f_tahun != '') {
+        $min_date = $f_tahun . '-01-01';
+        $max_date = $f_tahun . '-12-31';
+    }
 
     // 2. Query Utama Detail Arsip (Menggunakan prepared statement murni)
     $query_base = "SELECT a.*, u.nama_unit, k.nama_kategori 
@@ -35,6 +60,11 @@
     $params = [];
     $types = '';
 
+    if ($f_tanggal != '') {
+        $query_base .= " AND DATE(a.created_at) = ?";
+        $params[] = $f_tanggal;
+        $types .= 's';
+    }
     if ($f_unit != '') {
         $query_base .= " AND a.id_unit = ?";
         $params[] = $f_unit;
@@ -68,6 +98,11 @@
     $rekap_params = [];
     $rekap_types = '';
 
+    if ($f_tanggal != '') {
+        $q_rekap .= " AND DATE(a.created_at) = ?";
+        $rekap_params[] = $f_tanggal;
+        $rekap_types .= 's';
+    }
     if ($f_bulan != '') {
         $q_rekap .= " AND MONTH(a.created_at) = ?";
         $rekap_params[] = $f_bulan;
@@ -105,6 +140,11 @@
     $rekap_kat_params = [];
     $rekap_kat_types = '';
 
+    if ($f_tanggal != '') {
+        $q_rekap_kategori .= " AND DATE(a.created_at) = ?";
+        $rekap_kat_params[] = $f_tanggal;
+        $rekap_kat_types .= 's';
+    }
     if ($f_bulan != '') {
         $q_rekap_kategori .= " AND MONTH(a.created_at) = ?";
         $rekap_kat_params[] = $f_bulan;
@@ -130,11 +170,11 @@
     $rekap_kategori_data = mysqli_stmt_get_result($stmt_rekap_kat);
 
     $rekap_kategori_array = [];
-    $total_kategori_terpakai = 0; // Inisialisasi counter kategori terpakai
+    $total_kategori_terpakai = 0; 
     while ($rk = mysqli_fetch_assoc($rekap_kategori_data)) {
         $rekap_kategori_array[] = $rk;
         if ($rk['total'] > 0) {
-            $total_kategori_terpakai++; // Hitung jika kategori memiliki minimal 1 arsip pada filter aktif
+            $total_kategori_terpakai++; 
         }
     }
 
@@ -176,7 +216,9 @@
 
     // Format Periode Laporan
     $periode_cetak = "Semua Periode";
-    if ($f_bulan != '' || $f_tahun != '') {
+    if ($f_tanggal != '') {
+        $periode_cetak = date('d F Y', strtotime($f_tanggal));
+    } elseif ($f_bulan != '' || $f_tahun != '') {
         $teks_bulan = $f_bulan != '' ? $nama_bulan_indo[$f_bulan] . " " : "";
         $teks_tahun = $f_tahun != '' ? $f_tahun : "";
         $periode_cetak = $teks_bulan . $teks_tahun;
@@ -329,7 +371,7 @@
                 .btn-print,
                 .breadcrumb,
                 .bx-chevron-right,
-                .hide-on-print { 
+                .hide-on-print:not(.force-print) { 
                     display: none !important;
                 }
 
@@ -357,6 +399,12 @@
 
                 .table-title { color: #000 !important; font-size: 12px !important; margin-top: 15px; }
                 
+                /* 💡 MODIFIKASI FORCE PAGE BREAK: Aturan potong halaman agar rapi */
+                .force-page-break {
+                    page-break-before: always !important;
+                    break-before: page !important;
+                }
+
                 .table-data, .order {
                     box-shadow: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important;
                     background: #fff !important; overflow: visible !important; height: auto !important; border-radius: 0 !important;
@@ -365,6 +413,10 @@
                 table {
                     width: 100% !important; border-collapse: collapse !important; margin-top: 5px; margin-bottom: 20px;
                     page-break-inside: auto !important; border-radius: 0 !important;
+                }
+
+                thead {
+                    display: table-header-group !important;
                 }
 
                 tr { page-break-inside: avoid !important; page-break-after: auto !important; }
@@ -448,6 +500,18 @@
                     <form action="" method="GET">
                         <div class="filter-row">
                             <div class="form-group">
+                                <label>Pilih Tanggal (Harian)</label>
+                                <input type="date" 
+                                       name="filter_tanggal" 
+                                       value="<?= $f_tanggal; ?>" 
+                                       min="<?= $min_date; ?>" 
+                                       max="<?= $max_date; ?>" 
+                                       onchange="this.form.submit()" 
+                                       class="form-control-custom" 
+                                       style="width: 180px; cursor: pointer;">
+                            </div>
+
+                            <div class="form-group">
                                 <label>Unit Kerja</label>
                                 <select name="filter_unit" onchange="this.form.submit()" class="form-control-custom" style="width: 250px; cursor: pointer; padding: 10px;">
                                     <option value="">-- Semua Unit --</option>
@@ -493,7 +557,7 @@
                 <div class="report-stats">
                     <div class="stat-card">
                         <p>Total Arsip</p>
-                        <h3 style="color: var(--dark);"><?= $total_arsip; ?> <span style="font-size: 14px; font-weight: normal; color: var(--dark-grey);">Berkas</span></h3>
+                        <h3 ><?= $total_arsip; ?> <span style="font-size: 14px; font-weight: normal;">Berkas</span></h3>
                     </div>
                     <?php if ($f_unit == '') : ?>
                         <div class="stat-card" style="border-left-color: var(--orange);">
@@ -535,7 +599,8 @@
                     </div>
                 <?php endif; ?>
 
-                <div class="table-title">Rekapitulasi Arsip Per Kategori</div>
+                <!-- 💡 PERBAIKAN REVISI KEDUA: Jika cetak TANPA filter unit ($f_unit == ''), paksa tabel rekap kategori ini terjun langsung memulai Halaman 2 -->
+                <div class="table-title <?= ($f_unit == '') ? 'force-page-break' : ''; ?>">Rekapitulasi Arsip Per Kategori</div>
                 <div class="table-data" style="margin-bottom: 30px;">
                     <div class="order">
                         <table>
@@ -572,10 +637,11 @@
                     <canvas id="chartTrenArsip" height="90"></canvas>
                 </div>
 
-                <div class="table-title hide-on-print">
+                <!-- 💡 SINKRONISASI JALUR KEDUA: Jika filter unit aktif, baru bagian detail berkas ini yang turun memulai halaman baru (Halaman 2 atau 3) -->
+                <div class="table-title hide-on-print <?= ($f_unit != '') ? 'force-print force-page-break' : ''; ?>">
                     <?= ($f_unit == '') ? 'Detail Daftar Seluruh Arsip Digital' : 'Detail Daftar Arsip Kerja - ' . htmlspecialchars($nama_unit_aktif); ?>
                 </div>
-                <div class="table-data hide-on-print">
+                <div class="table-data hide-on-print <?= ($f_unit != '') ? 'force-print' : ''; ?>">
                     <div class="order">
                         <table>
                             <thead>
@@ -602,7 +668,7 @@
                                     <?php endwhile; ?>
                                 <?php else : ?>
                                     <tr>
-                                        <td colspan="5" style="text-align: center; padding: 30px; color: var(--dark-grey);">Tidak ada data arsip pada periode/filter ini.</td>
+                                        <td colspan="6" style="text-align: center; padding: 30px; color: var(--dark-grey);">Tidak ada data arsip pada periode/filter ini.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>

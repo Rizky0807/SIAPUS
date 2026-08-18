@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 23 Jun 2026 pada 08.26
+-- Waktu pembuatan: 22 Jul 2026 pada 17.40
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -53,14 +53,15 @@ CREATE TABLE `kategori` (
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `log_download`
+-- Struktur dari tabel `log_aktivitas`
 --
 
-CREATE TABLE `log_download` (
+CREATE TABLE `log_aktivitas` (
   `id_log` int(11) NOT NULL,
-  `id_arsip` int(11) DEFAULT NULL,
-  `user_pengunduh` varchar(100) NOT NULL,
-  `waktu_download` timestamp NOT NULL DEFAULT current_timestamp()
+  `waktu` timestamp NOT NULL DEFAULT current_timestamp(),
+  `id_user` int(11) NOT NULL,
+  `aktivitas` varchar(50) NOT NULL,
+  `objek_aktivitas` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -71,7 +72,9 @@ CREATE TABLE `log_download` (
 
 CREATE TABLE `unit_kerja` (
   `id_unit` int(11) NOT NULL,
+  `kode_unit` varchar(20) NOT NULL,
   `nama_unit` varchar(100) NOT NULL,
+  `penanggung_jawab` varchar(100) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -89,7 +92,6 @@ CREATE TABLE `users` (
   `foto` varchar(255) DEFAULT NULL,
   `role` enum('admin','petugas','pimpinan') NOT NULL,
   `id_unit` int(11) DEFAULT NULL,
-  `nama_unit` varchar(150) DEFAULT NULL,
   `status` enum('aktif','nonaktif') DEFAULT 'aktif',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -103,7 +105,6 @@ CREATE TABLE `users` (
 --
 ALTER TABLE `arsip`
   ADD PRIMARY KEY (`id_arsip`),
-  ADD UNIQUE KEY `kode_arsip` (`kode_arsip`),
   ADD KEY `id_kategori` (`id_kategori`),
   ADD KEY `id_unit` (`id_unit`);
 
@@ -114,11 +115,11 @@ ALTER TABLE `kategori`
   ADD PRIMARY KEY (`id_kategori`);
 
 --
--- Indeks untuk tabel `log_download`
+-- Indeks untuk tabel `log_aktivitas`
 --
-ALTER TABLE `log_download`
+ALTER TABLE `log_aktivitas`
   ADD PRIMARY KEY (`id_log`),
-  ADD KEY `id_arsip` (`id_arsip`);
+  ADD KEY `id_user` (`id_user`);
 
 --
 -- Indeks untuk tabel `unit_kerja`
@@ -151,9 +152,9 @@ ALTER TABLE `kategori`
   MODIFY `id_kategori` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT untuk tabel `log_download`
+-- AUTO_INCREMENT untuk tabel `log_aktivitas`
 --
-ALTER TABLE `log_download`
+ALTER TABLE `log_aktivitas`
   MODIFY `id_log` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -180,10 +181,10 @@ ALTER TABLE `arsip`
   ADD CONSTRAINT `arsip_ibfk_2` FOREIGN KEY (`id_unit`) REFERENCES `unit_kerja` (`id_unit`) ON DELETE CASCADE;
 
 --
--- Ketidakleluasaan untuk tabel `log_download`
+-- Ketidakleluasaan untuk tabel `log_aktivitas`
 --
-ALTER TABLE `log_download`
-  ADD CONSTRAINT `log_download_ibfk_1` FOREIGN KEY (`id_arsip`) REFERENCES `arsip` (`id_arsip`) ON DELETE CASCADE;
+ALTER TABLE `log_aktivitas`
+  ADD CONSTRAINT `log_aktivitas_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `users` (`id_user`) ON DELETE CASCADE;
 
 --
 -- Ketidakleluasaan untuk tabel `users`

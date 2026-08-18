@@ -143,7 +143,7 @@ $page = 'data_arsip.php';
         <main>
             <div class="head-title">
                 <div class="left">
-                    <h1>Pratinjau Dokumen</h1>
+                    <h1>Preview Dokumen</h1>
                     <p style="color: var(--dark-grey); font-size: 13px; margin-top: 2px;">Kode Arsip: <strong style="color: var(--dark); font-family: monospace; font-size: 14px;"><?= htmlspecialchars($data['kode_arsip']); ?></strong></p>
                 </div>
                 <a href="arsip_download.php?id=<?= $data['id_arsip']; ?>" class="btn-add" style="background: var(--green); text-decoration: none;">

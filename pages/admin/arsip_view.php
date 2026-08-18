@@ -39,7 +39,8 @@ $page = 'data_arsip.php';
     <title>Preview Arsip - SIAPSIJUNJUNG</title>
     <style>
         /* 💡 LOCK LAYOUT SATU LAYAR DESKTOP TOTAL KHAS SIAPUS */
-        html, body {
+        html,
+        body {
             height: 100vh;
             overflow: hidden !important;
         }
@@ -57,8 +58,6 @@ $page = 'data_arsip.php';
             flex-shrink: 0;
             margin-bottom: 15px !important;
         }
-
-        /* 💡 MENGATUR GRID AGAR BERBAGI RUANG SECARA DINAMIS */
         .view-wrapper {
             display: grid;
             grid-template-columns: 2.5fr 1fr;
@@ -77,8 +76,6 @@ $page = 'data_arsip.php';
             justify-content: center;
             height: 100%;
         }
-
-        /* 💡 MEMBENTUK PANEL DETAIL MENJADI WADAH SCROLL MANDIRI */
         .detail-card {
             background: var(--white-card, #fff);
             padding: 25px;
@@ -119,11 +116,10 @@ $page = 'data_arsip.php';
             margin-top: 4px;
             word-break: break-word;
         }
-
-        /* Modifikasi scrollbar internal panel detail */
         .detail-scroll-area::-webkit-scrollbar {
             width: 4px;
         }
+
         .detail-scroll-area::-webkit-scrollbar-thumb {
             background: var(--dark-grey);
             border-radius: 5px;
@@ -139,7 +135,7 @@ $page = 'data_arsip.php';
             <!-- HEAD TITLE -->
             <div class="head-title">
                 <div class="left">
-                    <h1>Pratinjau Dokumen</h1>
+                    <h1>Preview Dokumen</h1>
                     <p style="color: var(--dark-grey); font-size: 13px; margin-top: 2px;">Kode Arsip: <strong style="color: var(--dark); font-family: monospace; font-size: 14px;"><?= htmlspecialchars($data['kode_arsip']); ?></strong></p>
                 </div>
                 <a href="arsip_download.php?id=<?= $data['id_arsip']; ?>" class="btn-add" style="background: var(--green); text-decoration: none;">
@@ -148,10 +144,7 @@ $page = 'data_arsip.php';
                 </a>
             </div>
 
-            <!-- VIEW GRID WRAPPER -->
             <div class="view-wrapper">
-                
-                <!-- CONTAINER FILE ARSIP -->
                 <div class="preview-card">
                     <?php
                     $file = $data['file_arsip'];

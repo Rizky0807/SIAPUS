@@ -218,9 +218,7 @@ $page = 'dashboard.php';
       gap: 24px;
       flex-grow: 1;
       min-height: 0;
-      /* 🛠️ SINKRONISASI MUTLAK: Paksa kepala grid kiri & kanan sejajar rata atas satu garis */
       align-items: start !important;
-      /* Jarak pas antara card statistik di atas dengan panel data di bawah */
       margin-top: 20px !important;
     }
 

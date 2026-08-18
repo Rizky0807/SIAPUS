@@ -17,7 +17,7 @@ $nama_admin = $_SESSION['nama'] ?? 'Administrator';
 // Hanya admin & pimpinan yang boleh mengakses halaman Laporan Arsip.
 // Petugas unit tidak memiliki menu ini, jadi harus ditolak sebelum baris manapun dieksekusi.
 if (!in_array($role, ['admin', 'pimpinan'], true)) {
-    header("Location: ../dashboard.php"); // sesuaikan dengan halaman dashboard/403 milikmu
+    header("Location: ../dashboard.php"); 
     exit;
 }
 
@@ -28,13 +28,36 @@ $nama_bulan_indo = [
     '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
 ];
 
-// 1. Inisialisasi Filter Baru (Bulan, Tahun, Unit)
+// 1. Inisialisasi Filter Baru (Tanggal Harian, Bulan, Tahun, Unit)
 $f_unit = $_GET['filter_unit'] ?? '';
 $f_bulan = $_GET['filter_bulan'] ?? '';
 $f_tahun = $_GET['filter_tahun'] ?? '';
+$f_tanggal = $_GET['filter_tanggal'] ?? ''; // 💡 SELARAS: Filter Harian Masuk
 
-// 2. Query Utama Detail Arsip (pakai prepared statement, halaman ini sudah
-//    dipastikan hanya diakses admin/pimpinan sehingga tidak perlu filter per-unit_user lagi)
+// 💡 SELARAS: SOLUSI OTOMATIS RESET TANGGAL JIKA BULAN/TAHUN BERUBAH DAN TIDAK SINKRON
+if ($f_tanggal != '') {
+    $cek_bulan = date('m', strtotime($f_tanggal));
+    $cek_tahun = date('Y', strtotime($f_tanggal));
+    
+    if (($f_bulan != '' && $f_bulan !== $cek_bulan) || ($f_tahun != '' && $f_tahun !== $cek_tahun)) {
+        $f_tanggal = '';
+    }
+}
+
+// 💡 SELARAS: LOGIKA BATAS TANGGAL BERANTAI DINAMIS (KUNCI KALENDER)
+$min_date = "";
+$max_date = "";
+$tahun_aktif = ($f_tahun != '') ? $f_tahun : date('Y');
+
+if ($f_bulan != '') {
+    $min_date = $tahun_aktif . '-' . $f_bulan . '-01';
+    $max_date = date("Y-m-t", strtotime($min_date)); 
+} elseif ($f_tahun != '') {
+    $min_date = $f_tahun . '-01-01';
+    $max_date = $f_tahun . '-12-31';
+}
+
+// 2. Query Utama Detail Arsip (menggunakan prepared statement)
 $query_base = "SELECT a.*, u.nama_unit, k.nama_kategori 
                FROM arsip a 
                LEFT JOIN unit_kerja u ON a.id_unit = u.id_unit 
@@ -43,6 +66,11 @@ $query_base = "SELECT a.*, u.nama_unit, k.nama_kategori
 $params = [];
 $types = '';
 
+if ($f_tanggal != '') {
+    $query_base .= " AND DATE(a.created_at) = ?";
+    $params[] = $f_tanggal;
+    $types .= 's';
+}
 if ($f_unit != '') {
     $query_base .= " AND a.id_unit = ?";
     $params[] = $f_unit;
@@ -68,7 +96,7 @@ mysqli_stmt_execute($stmt);
 $query_laporan = mysqli_stmt_get_result($stmt);
 $total_arsip = mysqli_num_rows($query_laporan);
 
-// 3. Query untuk Rekap Per Unit (prepared statement juga)
+// 3. Query untuk Rekap Per Unit (prepared statement)
 $q_rekap = "SELECT u.nama_unit, COUNT(a.id_arsip) as total 
             FROM unit_kerja u 
             LEFT JOIN arsip a ON u.id_unit = a.id_unit";
@@ -76,6 +104,11 @@ $q_rekap = "SELECT u.nama_unit, COUNT(a.id_arsip) as total
 $rekap_params = [];
 $rekap_types = '';
 
+if ($f_tanggal != '') {
+    $q_rekap .= " AND DATE(a.created_at) = ?";
+    $rekap_params[] = $f_tanggal;
+    $rekap_types .= 's';
+}
 if ($f_bulan != '') {
     $q_rekap .= " AND MONTH(a.created_at) = ?";
     $rekap_params[] = $f_bulan;
@@ -92,7 +125,7 @@ $stmt_rekap = mysqli_prepare($koneksi, $q_rekap);
 if (!empty($rekap_params)) {
     mysqli_stmt_bind_param($stmt_rekap, $rekap_types, ...$rekap_params);
 }
-mysqli_stmt_execute($stmt_rekap);
+    mysqli_stmt_execute($stmt_rekap);
 $rekap_data = mysqli_stmt_get_result($stmt_rekap);
 
 // Proses data rekap dan hitung total unit yang memiliki arsip
@@ -105,7 +138,7 @@ while ($rkp = mysqli_fetch_assoc($rekap_data)) {
     }
 }
 
-// 4. Query Rekap Per Kategori Arsip (pola sama seperti rekap per unit di atas)
+// 4. Query Rekap Per Kategori Arsip
 $q_rekap_kategori = "SELECT k.nama_kategori, COUNT(a.id_arsip) as total 
                       FROM kategori k 
                       LEFT JOIN arsip a ON k.id_kategori = a.id_kategori";
@@ -113,6 +146,11 @@ $q_rekap_kategori = "SELECT k.nama_kategori, COUNT(a.id_arsip) as total
 $rekap_kat_params = [];
 $rekap_kat_types = '';
 
+if ($f_tanggal != '') {
+    $q_rekap_kategori .= " AND DATE(a.created_at) = ?";
+    $rekap_kat_params[] = $f_tanggal;
+    $rekap_kat_types .= 's';
+}
 if ($f_bulan != '') {
     $q_rekap_kategori .= " AND MONTH(a.created_at) = ?";
     $rekap_kat_params[] = $f_bulan;
@@ -138,7 +176,7 @@ mysqli_stmt_execute($stmt_rekap_kat);
 $rekap_kategori_data = mysqli_stmt_get_result($stmt_rekap_kat);
 
 $rekap_kategori_array = [];
-$total_kategori_terpakai = 0; // 💡 Counter kategori terpakai berdasarkan filter aktif
+$total_kategori_terpakai = 0; 
 while ($rk = mysqli_fetch_assoc($rekap_kategori_data)) {
     $rekap_kategori_array[] = $rk;
     if ($rk['total'] > 0) {
@@ -154,7 +192,7 @@ $q_tren = "SELECT DATE_FORMAT(created_at, '%Y-%m') as periode, COUNT(*) as total
            ORDER BY periode ASC";
 $tren_data = mysqli_query($koneksi, $q_tren);
 
-// Susun 12 bulan penuh (termasuk yang 0/tidak ada arsip) supaya grafik tidak bolong
+// Susun 12 bulan penuh agar grafik tidak bolong
 $tren_map = [];
 while ($t = mysqli_fetch_assoc($tren_data)) {
     $tren_map[$t['periode']] = (int) $t['total'];
@@ -185,7 +223,9 @@ if ($f_unit != '') {
 
 // Format Periode untuk Cetak Laporan
 $periode_cetak = "Semua Periode";
-if ($f_bulan != '' || $f_tahun != '') {
+if ($f_tanggal != '') {
+    $periode_cetak = date('d F Y', strtotime($f_tanggal));
+} elseif ($f_bulan != '' || $f_tahun != '') {
     $teks_bulan = $f_bulan != '' ? $nama_bulan_indo[$f_bulan] . " " : "";
     $teks_tahun = $f_tahun != '' ? $f_tahun : "";
     $periode_cetak = $teks_bulan . $teks_tahun;
@@ -277,7 +317,6 @@ $page = 'laporan_arsip.php';
             letter-spacing: 0.5px;
         }
 
-        /* Styling Breadcrumb agar Sejajar */
         .breadcrumb {
             display: flex;
             align-items: center;
@@ -329,7 +368,6 @@ $page = 'laporan_arsip.php';
             display: none !important;
         }
 
-        /* 💡 CONFIG MEDIAPRINT: REKAYASA HALAMAN HASIL CETAK KERTAS */
         @media print {
             #sidebar,
             nav,
@@ -339,7 +377,7 @@ $page = 'laporan_arsip.php';
             .btn-print,
             .breadcrumb,
             .bx-chevron-right,
-            .hide-on-print { 
+            .hide-on-print:not(.force-print) { 
                 display: none !important;
             }
 
@@ -362,7 +400,6 @@ $page = 'laporan_arsip.php';
                 display: block !important;
             }
 
-            /* 💡 Paksa Statistik tetap muncul di kertas cetak (menjadi 3 kolom) */
             .report-stats {
                 display: grid !important;
                 grid-template-columns: repeat(3, 1fr) !important;
@@ -383,6 +420,12 @@ $page = 'laporan_arsip.php';
                 margin-top: 15px;
             }
 
+            /* 💡 SELARAS: Aturan potong halaman agar rapi */
+            .force-page-break {
+                page-break-before: always !important;
+                break-before: page !important;
+            }
+
             .table-data, .order {
                 box-shadow: none !important;
                 margin: 0 !important;
@@ -401,6 +444,11 @@ $page = 'laporan_arsip.php';
                 margin-bottom: 20px;
                 page-break-inside: auto !important;
                 border-radius: 0 !important;
+            }
+
+            /* 💡 SELARAS: Kepala Kolom Otomatis Turun di Halaman 2, 3, dst */
+            thead {
+                display: table-header-group !important;
             }
 
             tr {
@@ -490,9 +538,7 @@ $page = 'laporan_arsip.php';
                     <tr style="border: none !important;">
                         <td style="border: none !important; padding: 2px !important;"><strong>Periode Data</strong></td>
                         <td style="border: none !important; padding: 2px !important;">:</td>
-                        <td colspan="4" style="border: none !important; padding: 2px !important;">
-                            <?= $periode_cetak; ?>
-                        </td>
+                        <td colspan="4" style="border: none !important; padding: 2px !important;"><?= $periode_cetak; ?></td>
                     </tr>
                 </table>
                 <hr style="border: 1px solid #000; margin-top: 15px;">
@@ -501,6 +547,18 @@ $page = 'laporan_arsip.php';
             <div class="filter-card">
                 <form action="" method="GET">
                     <div class="filter-row">
+                        <div class="form-group">
+                            <label>Pilih Tanggal (Harian)</label>
+                            <input type="date" 
+                                   name="filter_tanggal" 
+                                   value="<?= $f_tanggal; ?>" 
+                                   min="<?= $min_date; ?>" 
+                                   max="<?= $max_date; ?>" 
+                                   onchange="this.form.submit()" 
+                                   class="form-control-custom" 
+                                   style="width: 180px; cursor: pointer;">
+                        </div>
+
                         <div class="form-group">
                             <label>Unit Kerja</label>
                             <select name="filter_unit" onchange="this.form.submit()" class="form-control-custom" style="width: 250px; cursor: pointer; padding: 10px;">
@@ -589,7 +647,7 @@ $page = 'laporan_arsip.php';
                 </div>
             <?php endif; ?>
 
-            <div class="table-title">Rekapitulasi Arsip Per Kategori</div>
+            <div class="table-title <?= ($f_unit == '') ? 'force-page-break' : ''; ?>">Rekapitulasi Arsip Per Kategori</div>
             <div class="table-data" style="margin-bottom: 30px;">
                 <div class="order">
                     <table>
@@ -626,10 +684,10 @@ $page = 'laporan_arsip.php';
                 <canvas id="chartTrenArsip" height="90"></canvas>
             </div>
 
-            <div class="table-title hide-on-print">
+            <div class="table-title hide-on-print <?= ($f_unit != '') ? 'force-print force-page-break' : ''; ?>">
                 <?= ($f_unit == '') ? 'Detail Daftar Seluruh Arsip Digital' : 'Detail Daftar Arsip Kerja - ' . htmlspecialchars($nama_unit_aktif); ?>
             </div>
-            <div class="table-data hide-on-print">
+            <div class="table-data hide-on-print <?= ($f_unit != '') ? 'force-print' : ''; ?>">
                 <div class="order">
                     <table>
                         <thead>
